@@ -4,8 +4,8 @@ import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 
 export function getPlanModeV2AgentCount(): number {
   // Environment variable override takes precedence
-  if (process.env.CLAUDE_CODE_PLAN_V2_AGENT_COUNT) {
-    const count = parseInt(process.env.CLAUDE_CODE_PLAN_V2_AGENT_COUNT, 10)
+  if (process.env.PUA_CODE_PLAN_V2_AGENT_COUNT) {
+    const count = parseInt(process.env.PUA_CODE_PLAN_V2_AGENT_COUNT, 10)
     if (!isNaN(count) && count > 0 && count <= 10) {
       return count
     }
@@ -16,7 +16,7 @@ export function getPlanModeV2AgentCount(): number {
 
   if (
     subscriptionType === 'max' &&
-    rateLimitTier === 'default_claude_max_20x'
+    rateLimitTier === 'default_pua_max_20x'
   ) {
     return 3
   }
@@ -29,9 +29,9 @@ export function getPlanModeV2AgentCount(): number {
 }
 
 export function getPlanModeV2ExploreAgentCount(): number {
-  if (process.env.CLAUDE_CODE_PLAN_V2_EXPLORE_AGENT_COUNT) {
+  if (process.env.PUA_CODE_PLAN_V2_EXPLORE_AGENT_COUNT) {
     const count = parseInt(
-      process.env.CLAUDE_CODE_PLAN_V2_EXPLORE_AGENT_COUNT,
+      process.env.PUA_CODE_PLAN_V2_EXPLORE_AGENT_COUNT,
       10,
     )
     if (!isNaN(count) && count > 0 && count <= 10) {
@@ -51,7 +51,7 @@ export function isPlanModeInterviewPhaseEnabled(): boolean {
   // Always on for ants
   if (process.env.USER_TYPE === 'ant') return true
 
-  const env = process.env.CLAUDE_CODE_PLAN_MODE_INTERVIEW_PHASE
+  const env = process.env.PUA_CODE_PLAN_MODE_INTERVIEW_PHASE
   if (isEnvTruthy(env)) return true
   if (isEnvDefinedFalsy(env)) return false
 

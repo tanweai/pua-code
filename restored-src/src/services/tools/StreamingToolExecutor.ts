@@ -1,4 +1,4 @@
-import type { ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ToolUseBlock } from '@pua-ai/sdk/resources/index.mjs'
 import {
   createUserMessage,
   REJECT_MESSAGE,

@@ -6,7 +6,7 @@ import { dirname, join, parse } from 'path'
 import { getPlatform } from 'src/utils/platform.js'
 import type { PluginError } from '../../types/plugin.js'
 import { getPluginErrorMessage } from '../../types/plugin.js'
-import { isClaudeInChromeMCPServer } from '../../utils/claudeInChrome/common.js'
+import { isPUAInChromeMCPServer } from '../../utils/puaInChrome/common.js'
 import {
   getCurrentProjectConfig,
   getGlobalConfig,
@@ -40,7 +40,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from '../analytics/index.js'
-import { fetchClaudeAIMcpConfigsIfEligible } from './claudeai.js'
+import { fetchPUAAIMcpConfigsIfEligible } from './puaai.js'
 import { expandEnvVarsInString } from './envExpansion.js'
 import {
   type ConfigScope,
@@ -162,7 +162,7 @@ function getServerUrl(config: McpServerConfig): string | null {
 }
 
 /**
- * CCR proxy URL path markers. In remote sessions, claude.ai connectors arrive
+ * CCR proxy URL path markers. In remote sessions, pua.ai connectors arrive
  * via --mcp-config with URLs rewritten to route through the CCR/session-ingress
  * SHTTP proxy. The original vendor URL is preserved in the mcp_url query param
  * so the proxy knows where to forward. See api-go/ccr/internal/ccrshared/
@@ -195,7 +195,7 @@ export function unwrapCcrProxyUrl(url: string): string {
 /**
  * Compute a dedup signature for an MCP server config.
  * Two configs with the same signature are considered "the same server" for
- * plugin deduplication. Ignores env (plugins always inject CLAUDE_PLUGIN_ROOT)
+ * plugin deduplication. Ignores env (plugins always inject PUA_PLUGIN_ROOT)
  * and headers (same URL = same server regardless of auth).
  * Returns null only for configs with neither command nor url (sdk type).
  */
@@ -266,20 +266,20 @@ export function dedupPluginMcpServers(
 }
 
 /**
- * Filter claude.ai connectors, dropping any whose signature matches an enabled
+ * Filter pua.ai connectors, dropping any whose signature matches an enabled
  * manually-configured server. Manual wins: a user who wrote .mcp.json or ran
- * `claude mcp add` expressed higher intent than a connector toggled in the web UI.
+ * `pua mcp add` expressed higher intent than a connector toggled in the web UI.
  *
- * Connector keys are `claude.ai <DisplayName>` so they never key-collide with
+ * Connector keys are `pua.ai <DisplayName>` so they never key-collide with
  * manual servers in the merge — this content-based check catches the case where
  * both point at the same underlying URL (e.g. `mcp__slack__*` and
- * `mcp__claude_ai_Slack__*` both hitting mcp.slack.com, ~600 chars/turn wasted).
+ * `mcp__pua_ai_Slack__*` both hitting mcp.slack.com, ~600 chars/turn wasted).
  *
  * Only enabled manual servers count as dedup targets — a disabled manual server
  * mustn't suppress its connector twin, or neither runs.
  */
-export function dedupClaudeAiMcpServers(
-  claudeAiServers: Record<string, ScopedMcpServerConfig>,
+export function dedupPUAAiMcpServers(
+  puaAiServers: Record<string, ScopedMcpServerConfig>,
   manualServers: Record<string, ScopedMcpServerConfig>,
 ): {
   servers: Record<string, ScopedMcpServerConfig>
@@ -294,12 +294,12 @@ export function dedupClaudeAiMcpServers(
 
   const servers: Record<string, ScopedMcpServerConfig> = {}
   const suppressed: Array<{ name: string; duplicateOf: string }> = []
-  for (const [name, config] of Object.entries(claudeAiServers)) {
+  for (const [name, config] of Object.entries(puaAiServers)) {
     const sig = getMcpServerSignature(config)
     const manualDup = sig !== null ? manualSigs.get(sig) : undefined
     if (manualDup !== undefined) {
       logForDebugging(
-        `Suppressing claude.ai connector "${name}": duplicates manually-configured "${manualDup}"`,
+        `Suppressing pua.ai connector "${name}": duplicates manually-configured "${manualDup}"`,
       )
       suppressed.push({ name, duplicateOf: manualDup })
       continue
@@ -513,7 +513,7 @@ function isMcpServerAllowedByPolicy(
  * returned so callers can warn the user.
  *
  * Intended for user-controlled config entry points that bypass the policy filter
- * in getClaudeCodeMcpConfigs(): --mcp-config (main.tsx) and the mcp_set_servers
+ * in getPUACodeMcpConfigs(): --mcp-config (main.tsx) and the mcp_set_servers
  * control message (print.ts, SDK V2 Query.setMcpServers()).
  *
  * SDK-type servers are exempt — they are SDK-managed transport placeholders,
@@ -604,7 +604,7 @@ function expandEnvVars(config: McpServerConfig): {
     case 'sdk':
       expanded = config
       break
-    case 'claudeai-proxy':
+    case 'puaai-proxy':
       expanded = config
       break
   }
@@ -633,8 +633,8 @@ export async function addMcpConfig(
     )
   }
 
-  // Block reserved server name "claude-in-chrome"
-  if (isClaudeInChromeMCPServer(name)) {
+  // Block reserved server name "pua-in-chrome"
+  if (isPUAInChromeMCPServer(name)) {
     throw new Error(`Cannot add MCP server "${name}": this name is reserved.`)
   }
 
@@ -705,8 +705,8 @@ export async function addMcpConfig(
       throw new Error('Cannot add MCP server to scope: dynamic')
     case 'enterprise':
       throw new Error('Cannot add MCP server to scope: enterprise')
-    case 'claudeai':
-      throw new Error('Cannot add MCP server to scope: claudeai')
+    case 'puaai':
+      throw new Error('Cannot add MCP server to scope: puaai')
   }
 
   // Add based on scope
@@ -1034,7 +1034,7 @@ export function getMcpConfigByName(name: string): ScopedMcpServerConfig | null {
   const { servers: enterpriseServers } = getMcpConfigsByScope('enterprise')
 
   // When MCP is locked to plugin-only, only enterprise servers are reachable
-  // by name. User/project/local servers are blocked — same as getClaudeCodeMcpConfigs().
+  // by name. User/project/local servers are blocked — same as getPUACodeMcpConfigs().
   if (isRestrictedToPluginOnly('mcp')) {
     return enterpriseServers[name] ?? null
   }
@@ -1060,15 +1060,15 @@ export function getMcpConfigByName(name: string): ScopedMcpServerConfig | null {
 }
 
 /**
- * Get Claude Code MCP configurations (excludes claude.ai servers from the
+ * Get PUA Code MCP configurations (excludes pua.ai servers from the
  * returned set — they're fetched separately and merged by callers).
  * This is fast: only local file reads; no awaited network calls on the
  * critical path. The optional extraDedupTargets promise (e.g. the in-flight
- * claude.ai connector fetch) is awaited only after loadAllPluginsCacheOnly() completes,
+ * pua.ai connector fetch) is awaited only after loadAllPluginsCacheOnly() completes,
  * so the two overlap rather than serialize.
- * @returns Claude Code server configurations with appropriate scopes
+ * @returns PUA Code server configurations with appropriate scopes
  */
-export async function getClaudeCodeMcpConfigs(
+export async function getPUACodeMcpConfigs(
   dynamicServers: Record<string, ScopedMcpServerConfig> = {},
   extraDedupTargets: Promise<
     Record<string, ScopedMcpServerConfig>
@@ -1251,40 +1251,40 @@ export async function getClaudeCodeMcpConfigs(
 }
 
 /**
- * Get all MCP configurations across all scopes, including claude.ai servers.
- * This may be slow due to network calls - use getClaudeCodeMcpConfigs() for fast startup.
+ * Get all MCP configurations across all scopes, including pua.ai servers.
+ * This may be slow due to network calls - use getPUACodeMcpConfigs() for fast startup.
  * @returns All server configurations with appropriate scopes
  */
 export async function getAllMcpConfigs(): Promise<{
   servers: Record<string, ScopedMcpServerConfig>
   errors: PluginError[]
 }> {
-  // In enterprise mode, don't load claude.ai servers (enterprise has exclusive control)
+  // In enterprise mode, don't load pua.ai servers (enterprise has exclusive control)
   if (doesEnterpriseMcpConfigExist()) {
-    return getClaudeCodeMcpConfigs()
+    return getPUACodeMcpConfigs()
   }
 
-  // Kick off the claude.ai fetch before getClaudeCodeMcpConfigs so it overlaps
+  // Kick off the pua.ai fetch before getPUACodeMcpConfigs so it overlaps
   // with loadAllPluginsCacheOnly() inside. Memoized — the awaited call below is a cache hit.
-  const claudeaiPromise = fetchClaudeAIMcpConfigsIfEligible()
-  const { servers: claudeCodeServers, errors } = await getClaudeCodeMcpConfigs(
+  const puaaiPromise = fetchPUAAIMcpConfigsIfEligible()
+  const { servers: puaCodeServers, errors } = await getPUACodeMcpConfigs(
     {},
-    claudeaiPromise,
+    puaaiPromise,
   )
-  const { allowed: claudeaiMcpServers } = filterMcpServersByPolicy(
-    await claudeaiPromise,
+  const { allowed: puaaiMcpServers } = filterMcpServersByPolicy(
+    await puaaiPromise,
   )
 
-  // Suppress claude.ai connectors that duplicate an enabled manual server.
-  // Keys never collide (`slack` vs `claude.ai Slack`) so the merge below
+  // Suppress pua.ai connectors that duplicate an enabled manual server.
+  // Keys never collide (`slack` vs `pua.ai Slack`) so the merge below
   // won't catch this — need content-based dedup by URL signature.
-  const { servers: dedupedClaudeAi } = dedupClaudeAiMcpServers(
-    claudeaiMcpServers,
-    claudeCodeServers,
+  const { servers: dedupedPUAAi } = dedupPUAAiMcpServers(
+    puaaiMcpServers,
+    puaCodeServers,
   )
 
-  // Merge with claude.ai having lowest precedence
-  const servers = Object.assign({}, dedupedClaudeAi, claudeCodeServers)
+  // Merge with pua.ai having lowest precedence
+  const servers = Object.assign({}, dedupedPUAAi, puaCodeServers)
 
   return { servers, errors }
 }
@@ -1359,7 +1359,7 @@ export function parseMcpConfig(params: {
         ...(filePath && { file: filePath }),
         path: `mcpServers.${name}`,
         message: `Windows requires 'cmd /c' wrapper to execute npx`,
-        suggestion: `Change command to "cmd" with args ["/c", "npx", ...]. See: https://code.claude.com/docs/en/mcp#configure-mcp-servers`,
+        suggestion: `Change command to "cmd" with args ["/c", "npx", ...]. See: https://code.pua.com/docs/en/mcp#configure-mcp-servers`,
         mcpErrorMetadata: {
           scope,
           serverName: name,
@@ -1495,11 +1495,11 @@ export function areMcpConfigsAllowedWithEnterpriseMcpConfig(
   configs: Record<string, ScopedMcpServerConfig>,
 ): boolean {
   // NOTE: While all SDK MCP servers should be safe from a security perspective, we are still discussing
-  // what the best way to do this is. In the meantime, we are limiting this to claude-vscode for now to
+  // what the best way to do this is. In the meantime, we are limiting this to pua-vscode for now to
   // unbreak the VSCode extension for certain enterprise customers who have enterprise MCP config enabled.
-  // https://anthropic.slack.com/archives/C093UA0KLD7/p1764975463670109
+  // https://pua.slack.com/archives/C093UA0KLD7/p1764975463670109
   return Object.values(configs).every(
-    c => c.type === 'sdk' && c.name === 'claude-vscode',
+    c => c.type === 'sdk' && c.name === 'pua-vscode',
   )
 }
 

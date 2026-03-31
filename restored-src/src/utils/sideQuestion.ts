@@ -104,7 +104,7 @@ ${question}`
 /**
  * Extract a display string from forked agent messages.
  *
- * IMPORTANT: claude.ts yields one AssistantMessage PER CONTENT BLOCK, not one
+ * IMPORTANT: pua.ts yields one AssistantMessage PER CONTENT BLOCK, not one
  * per API response. With adaptive thinking enabled (inherited from the main
  * thread to preserve the cache key), a thinking response arrives as:
  *   messages[0] = assistant { content: [thinking_block] }
@@ -112,7 +112,7 @@ ${question}`
  *
  * The old code used `.find(m => m.type === 'assistant')` which grabbed the
  * first (thinking-only) message, found no text block, and returned null →
- * "No response received". Repos with large context (many skills, big CLAUDE.md)
+ * "No response received". Repos with large context (many skills, big PUA.md)
  * trigger thinking more often, which is why this reproduced in the monorepo
  * but not here.
  *

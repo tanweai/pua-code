@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { HookEvent } from 'src/entrypoints/agentSdkTypes.js'
-import { queryModelWithoutStreaming } from '../../services/api/claude.js'
+import { queryModelWithoutStreaming } from '../../services/api/pua.js'
 import type { ToolUseContext } from '../../Tool.js'
 import type { Message } from '../../types/message.js'
 import { createAttachmentMessage } from '../attachments.js'
@@ -62,7 +62,7 @@ export async function execPromptHook(
       const response = await queryModelWithoutStreaming({
         messages: messagesToQuery,
         systemPrompt: asSystemPrompt([
-          `You are evaluating a hook in Claude Code.
+          `You are evaluating a hook in PUA Code.
 
 Your response must be a JSON object matching one of the following schemas:
 1. If the condition is met, return: {"ok": true}

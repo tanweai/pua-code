@@ -30,7 +30,7 @@ type Props = {
   onCancel: () => void;
   onTabPrev?: () => void;
   onTabNext?: () => void;
-  onRespondToClaude: () => void;
+  onRespondToPUA: () => void;
   onFinishPlanInterview: () => void;
 };
 
@@ -53,7 +53,7 @@ export function PreviewQuestionView({
   onCancel,
   onTabPrev,
   onTabNext,
-  onRespondToClaude,
+  onRespondToPUA,
   onFinishPlanInterview
 }: Props): React.ReactNode {
   const isInPlanMode = useAppState(s => s.toolPermissionContext.mode) === 'plan';
@@ -173,7 +173,7 @@ export function PreviewQuestionView({
       if (e.key === 'return') {
         e.preventDefault();
         if (footerIndex === 0) {
-          onRespondToClaude();
+          onRespondToPUA();
         } else {
           onFinishPlanInterview();
         }
@@ -226,7 +226,7 @@ export function PreviewQuestionView({
         handleNavigate(idx_0);
       }
     }
-  }, [isFooterFocused, footerIndex, isInPlanMode, isInNotesInput, focusedIndex, allOptions.length, handleUpFromFooter, handleDownFromPreview, handleNavigate, handleSelectOption, handleNotesExit, onRespondToClaude, onFinishPlanInterview, onCancel, onTextInputFocus]);
+  }, [isFooterFocused, footerIndex, isInPlanMode, isInNotesInput, focusedIndex, allOptions.length, handleUpFromFooter, handleDownFromPreview, handleNavigate, handleSelectOption, handleNotesExit, onRespondToPUA, onFinishPlanInterview, onCancel, onTextInputFocus]);
   const previewContent = focusedOption?.preview || null;
 
   // The right panel's available width is terminal minus the left panel and gap.

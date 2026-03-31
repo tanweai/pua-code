@@ -15,7 +15,7 @@ import type {
 } from '../services/mcp/types.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
 import { env } from './env.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { getPUAConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import {
   execFileNoThrow,
   execFileNoThrowWithCwd,
@@ -292,7 +292,7 @@ export function getTerminalIdeType(): IdeType | null {
 }
 
 /**
- * Gets sorted IDE lockfiles from ~/.claude/ide directory
+ * Gets sorted IDE lockfiles from ~/.pua/ide directory
  * @returns Array of full lockfile paths sorted by modification time (newest first)
  */
 export async function getSortedIdeLockfiles(): Promise<string[]> {
@@ -460,7 +460,7 @@ const getWindowsUserProfile = memoize(async (): Promise<string | undefined> => {
  * stat loop compounded startup latency.
  */
 export async function getIdeLockfilesPaths(): Promise<string[]> {
-  const paths: string[] = [join(getClaudeConfigHomeDir(), 'ide')]
+  const paths: string[] = [join(getPUAConfigHomeDir(), 'ide')]
 
   if (getPlatform() !== 'wsl') {
     return paths
@@ -474,7 +474,7 @@ export async function getIdeLockfilesPaths(): Promise<string[]> {
   if (windowsHome) {
     const converter = new WindowsToWSLConverter(process.env.WSL_DISTRO_NAME)
     const wslPath = converter.toLocalPath(windowsHome)
-    paths.push(resolve(wslPath, '.claude', 'ide'))
+    paths.push(resolve(wslPath, '.pua', 'ide'))
   }
 
   // Construct the path based on the standard Windows WSL locations
@@ -499,7 +499,7 @@ export async function getIdeLockfilesPaths(): Promise<string[]> {
       ) {
         continue // Skip system directories
       }
-      paths.push(join(usersDir, user.name, '.claude', 'ide'))
+      paths.push(join(usersDir, user.name, '.pua', 'ide'))
     }
   } catch (error: unknown) {
     if (isFsInaccessible(error)) {
@@ -667,8 +667,8 @@ export async function detectIDEs(
   const detectedIDEs: DetectedIDEInfo[] = []
 
   try {
-    // Get the CLAUDE_CODE_SSE_PORT if set
-    const ssePort = process.env.CLAUDE_CODE_SSE_PORT
+    // Get the PUA_CODE_SSE_PORT if set
+    const ssePort = process.env.PUA_CODE_SSE_PORT
     const envPort = ssePort ? parseInt(ssePort) : null
 
     // Get the current working directory, normalized to NFC for consistent
@@ -694,7 +694,7 @@ export async function detectIDEs(
       if (!lockfileInfo) continue
 
       let isValid = false
-      if (isEnvTruthy(process.env.CLAUDE_CODE_IDE_SKIP_VALID_CHECK)) {
+      if (isEnvTruthy(process.env.PUA_CODE_IDE_SKIP_VALID_CHECK)) {
         isValid = true
       } else if (lockfileInfo.port === envPort) {
         // If the port matches the environment variable, mark as valid regardless of directory
@@ -846,8 +846,8 @@ export function hasAccessToIDEExtensionDiffFeature(
 
 const EXTENSION_ID =
   process.env.USER_TYPE === 'ant'
-    ? 'anthropic.claude-code-internal'
-    : 'anthropic.claude-code'
+    ? 'pua.pua-code-internal'
+    : 'pua.pua-code'
 
 export async function isIDEExtensionInstalled(
   ideType: IdeType,
@@ -886,12 +886,12 @@ async function installIDEExtension(ideType: IdeType): Promise<string | null> {
       }
       let version = await getInstalledVSCodeExtensionVersion(command)
       // If it's not installed or the version is older than the one we have bundled,
-      if (!version || lt(version, getClaudeCodeVersion())) {
+      if (!version || lt(version, getPUACodeVersion())) {
         // `code` may crash when invoked too quickly in succession
         await sleep(500)
         const result = await execFileNoThrowWithCwd(
           command,
-          ['--force', '--install-extension', 'anthropic.claude-code'],
+          ['--force', '--install-extension', 'pua.pua-code'],
           {
             env: getInstallationEnv(),
           },
@@ -899,7 +899,7 @@ async function installIDEExtension(ideType: IdeType): Promise<string | null> {
         if (result.code !== 0) {
           throw new Error(`${result.code}: ${result.error} ${result.stderr}`)
         }
-        version = getClaudeCodeVersion()
+        version = getPUACodeVersion()
       }
       return version
     }
@@ -924,7 +924,7 @@ function getInstallationEnv(): NodeJS.ProcessEnv | undefined {
   return undefined
 }
 
-function getClaudeCodeVersion() {
+function getPUACodeVersion() {
   return MACRO.VERSION
 }
 
@@ -941,7 +941,7 @@ async function getInstalledVSCodeExtensionVersion(
   const lines = stdout?.split('\n') || []
   for (const line of lines) {
     const [extensionId, version] = line.split('@')
-    if (extensionId === 'anthropic.claude-code' && version) {
+    if (extensionId === 'pua.pua-code' && version) {
       return version
     }
   }
@@ -1033,7 +1033,7 @@ async function getVSCodeIDECommand(ideType: IdeType): Promise<string | null> {
   // then resolves to Code.exe via PATHEXT which opens a new editor window
   // instead of running the CLI. Asking for 'code.cmd' forces cross-spawn/which
   // to skip Code.exe. See microsoft/vscode#299416 (fixed in Insiders) and
-  // anthropics/claude-code#30975.
+  // puas/pua-code#30975.
   const ext = getPlatform() === 'windows' ? '.cmd' : ''
   switch (ideType) {
     case 'vscode':
@@ -1298,7 +1298,7 @@ export async function initializeIdeIntegration(
 
   const shouldAutoInstall = getGlobalConfig().autoInstallIdeExtension ?? true
   if (
-    !isEnvTruthy(process.env.CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL) &&
+    !isEnvTruthy(process.env.PUA_CODE_IDE_SKIP_AUTO_INSTALL) &&
     shouldAutoInstall
   ) {
     const ideType = ideToInstallExtension ?? getTerminalIdeType()
@@ -1352,8 +1352,8 @@ export async function initializeIdeIntegration(
  */
 const detectHostIP = memoize(
   async (isIdeRunningInWindows: boolean, port: number) => {
-    if (process.env.CLAUDE_CODE_IDE_HOST_OVERRIDE) {
-      return process.env.CLAUDE_CODE_IDE_HOST_OVERRIDE
+    if (process.env.PUA_CODE_IDE_HOST_OVERRIDE) {
+      return process.env.PUA_CODE_IDE_HOST_OVERRIDE
     }
 
     if (getPlatform() !== 'wsl' || !isIdeRunningInWindows) {
@@ -1421,7 +1421,7 @@ async function installFromArtifactory(command: string): Promise<string> {
 
   // Fetch the version from artifactory
   const versionUrl =
-    'https://artifactory.infra.ant.dev/artifactory/armorcode-claude-code-internal/claude-vscode-releases/stable'
+    'https://artifactory.infra.ant.dev/artifactory/armorcode-pua-code-internal/pua-vscode-releases/stable'
 
   try {
     const versionResponse = await axios.get(versionUrl, {
@@ -1436,10 +1436,10 @@ async function installFromArtifactory(command: string): Promise<string> {
     }
 
     // Download the .vsix file from artifactory
-    const vsixUrl = `https://artifactory.infra.ant.dev/artifactory/armorcode-claude-code-internal/claude-vscode-releases/${version}/claude-code.vsix`
+    const vsixUrl = `https://artifactory.infra.ant.dev/artifactory/armorcode-pua-code-internal/pua-vscode-releases/${version}/pua-code.vsix`
     const tempVsixPath = join(
       os.tmpdir(),
-      `claude-code-${version}-${Date.now()}.vsix`,
+      `pua-code-${version}-${Date.now()}.vsix`,
     )
 
     try {

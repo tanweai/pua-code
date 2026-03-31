@@ -1,8 +1,8 @@
 import {
-  getAnthropicApiKey,
+  getPUAApiKey,
   getAuthTokenSource,
   getSubscriptionType,
-  isClaudeAISubscriber,
+  isPUAAISubscriber,
 } from './auth.js'
 import { getGlobalConfig } from './config.js'
 import { isEnvTruthy } from './envUtils.js'
@@ -13,7 +13,7 @@ export function hasConsoleBillingAccess(): boolean {
     return false
   }
 
-  const isSubscriber = isClaudeAISubscriber()
+  const isSubscriber = isPUAAISubscriber()
 
   // This might be wrong if user is signed into Max but also using an API key, but
   // we already show a warning on launch in that case
@@ -21,7 +21,7 @@ export function hasConsoleBillingAccess(): boolean {
 
   // Check if user has any form of authentication
   const authSource = getAuthTokenSource()
-  const hasApiKey = getAnthropicApiKey() !== null
+  const hasApiKey = getPUAApiKey() !== null
 
   // If user has no authentication at all (logged out), don't show costs
   if (!authSource.hasToken && !hasApiKey) {
@@ -50,13 +50,13 @@ export function setMockBillingAccessOverride(value: boolean | null): void {
   mockBillingAccessOverride = value
 }
 
-export function hasClaudeAiBillingAccess(): boolean {
+export function hasPUAAiBillingAccess(): boolean {
   // Check for mock billing access first (for /mock-limits testing)
   if (mockBillingAccessOverride !== null) {
     return mockBillingAccessOverride
   }
 
-  if (!isClaudeAISubscriber()) {
+  if (!isPUAAISubscriber()) {
     return false
   }
 

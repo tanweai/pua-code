@@ -101,7 +101,7 @@ export function CheckExistingSecretStep(t0) {
   }
   let t9;
   if ($[16] === Symbol.for("react.memo_cache_sentinel")) {
-    t9 = <Box marginBottom={1}><Text color="warning">ANTHROPIC_API_KEY already exists in repository secrets!</Text></Box>;
+    t9 = <Box marginBottom={1}><Text color="warning">PUA_API_KEY already exists in repository secrets!</Text></Box>;
     $[16] = t9;
   } else {
     t9 = $[16];
@@ -149,7 +149,7 @@ export function CheckExistingSecretStep(t0) {
   }
   let t15;
   if ($[28] !== cursorOffset || $[29] !== onSecretNameChange || $[30] !== onSubmit || $[31] !== secretName || $[32] !== terminalSize || $[33] !== useExistingSecret) {
-    t15 = !useExistingSecret && <><Box marginBottom={1}><Text>Enter new secret name (alphanumeric with underscores):</Text></Box><TextInput value={secretName} onChange={onSecretNameChange} onSubmit={onSubmit} focus={true} placeholder="e.g., CLAUDE_API_KEY" columns={terminalSize.columns} cursorOffset={cursorOffset} onChangeCursorOffset={setCursorOffset} showCursor={true} /></>;
+    t15 = !useExistingSecret && <><Box marginBottom={1}><Text>Enter new secret name (alphanumeric with underscores):</Text></Box><TextInput value={secretName} onChange={onSecretNameChange} onSubmit={onSubmit} focus={true} placeholder="e.g., PUA_API_KEY" columns={terminalSize.columns} cursorOffset={cursorOffset} onChangeCursorOffset={setCursorOffset} showCursor={true} /></>;
     $[28] = cursorOffset;
     $[29] = onSecretNameChange;
     $[30] = onSubmit;

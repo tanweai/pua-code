@@ -11,7 +11,7 @@ import { getTotalAPIDuration, getTotalCost, getTotalDuration, getTotalInputToken
 import { useMainLoopModel } from '../hooks/useMainLoopModel.js';
 import { type ReadonlySettings, useSettings } from '../hooks/useSettings.js';
 import { Ansi, Box, Text } from '../ink.js';
-import { getRawUtilization } from '../services/claudeAiLimits.js';
+import { getRawUtilization } from '../services/puaAiLimits.js';
 import type { Message } from '../types/message.js';
 import type { StatusLineCommandInput } from '../types/statusLine.js';
 import type { VimMode } from '../types/textInputTypes.js';
@@ -151,7 +151,7 @@ function StatusLineInner({
   } = useNotifications();
   // AppState-sourced model — same source as API requests. getMainLoopModel()
   // re-reads settings.json on every call, so another session's /model write
-  // would leak into this session's statusline (anthropics/claude-code#37596).
+  // would leak into this session's statusline (puas/pua-code#37596).
   const mainLoopModel = useMainLoopModel();
 
   // Keep latest values in refs for stable callback access

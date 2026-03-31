@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getSessionId } from '../bootstrap/state.js'
 import { logForDebugging } from './debug.js'
-import { getClaudeConfigHomeDir } from './envUtils.js'
+import { getPUAConfigHomeDir } from './envUtils.js'
 import { errorMessage, getErrnoCode } from './errors.js'
 import { getPlatform } from './platform.js'
 
@@ -14,7 +14,7 @@ let sessionEnvScript: string | null | undefined = undefined
 
 export async function getSessionEnvDirPath(): Promise<string> {
   const sessionEnvDir = join(
-    getClaudeConfigHomeDir(),
+    getPUAConfigHomeDir(),
     'session-env',
     getSessionId(),
   )
@@ -69,22 +69,22 @@ export async function getSessionEnvironmentScript(): Promise<string | null> {
 
   const scripts: string[] = []
 
-  // Check for CLAUDE_ENV_FILE passed from parent process (e.g., HFI trajectory runner)
+  // Check for PUA_ENV_FILE passed from parent process (e.g., HFI trajectory runner)
   // This allows venv/conda activation to persist across shell commands
-  const envFile = process.env.CLAUDE_ENV_FILE
+  const envFile = process.env.PUA_ENV_FILE
   if (envFile) {
     try {
       const envScript = (await readFile(envFile, 'utf8')).trim()
       if (envScript) {
         scripts.push(envScript)
         logForDebugging(
-          `Session environment loaded from CLAUDE_ENV_FILE: ${envFile} (${envScript.length} chars)`,
+          `Session environment loaded from PUA_ENV_FILE: ${envFile} (${envScript.length} chars)`,
         )
       }
     } catch (e: unknown) {
       const code = getErrnoCode(e)
       if (code !== 'ENOENT') {
-        logForDebugging(`Failed to read CLAUDE_ENV_FILE: ${errorMessage(e)}`)
+        logForDebugging(`Failed to read PUA_ENV_FILE: ${errorMessage(e)}`)
       }
     }
   }

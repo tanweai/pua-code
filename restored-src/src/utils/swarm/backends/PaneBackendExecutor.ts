@@ -30,7 +30,7 @@ import type {
  * return a meaningful executor regardless of execution mode.
  *
  * The adapter handles:
- * - spawn(): Creates a pane and sends the Claude CLI command to it
+ * - spawn(): Creates a pane and sends the PUA CLI command to it
  * - sendMessage(): Writes to the teammate's file-based mailbox
  * - terminate(): Sends a shutdown request via mailbox
  * - kill(): Kills the pane via the backend
@@ -110,7 +110,7 @@ export class PaneBackendExecutor implements TeammateExecutor {
         await this.backend.enablePaneBorderStatus()
       }
 
-      // Build the command to spawn Claude Code with teammate identity
+      // Build the command to spawn PUA Code with teammate identity
       const binaryPath = getTeammateCommand()
 
       // Build teammate identity CLI args

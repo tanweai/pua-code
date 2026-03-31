@@ -4,8 +4,8 @@ import { getOrganizationUUID } from 'src/services/oauth/client.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../../services/analytics/growthbook.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
-  isClaudeAISubscriber,
+  getPUAAIOAuthTokens,
+  isPUAAISubscriber,
 } from '../../auth.js'
 import { getCwd } from '../../cwd.js'
 import { logForDebugging } from '../../debug.js'
@@ -16,12 +16,12 @@ import { getOAuthHeaders } from '../../teleport/api.js'
 import { fetchEnvironments } from '../../teleport/environments.js'
 
 /**
- * Checks if user needs to log in with Claude.ai
+ * Checks if user needs to log in with PUA.ai
  * Extracted from getTeleportErrors() in TeleportError.tsx
  * @returns true if login is required, false otherwise
  */
-export async function checkNeedsClaudeAiLogin(): Promise<boolean> {
-  if (!isClaudeAISubscriber()) {
+export async function checkNeedsPUAAiLogin(): Promise<boolean> {
+  if (!isPUAAISubscriber()) {
     return false
   }
   return checkAndRefreshOAuthTokenIfNeeded()
@@ -71,8 +71,8 @@ export async function checkHasGitRemote(): Promise<boolean> {
 
 /**
  * Checks if GitHub app is installed on a specific repository
- * @param owner The repository owner (e.g., "anthropics")
- * @param repo The repository name (e.g., "claude-cli-internal")
+ * @param owner The repository owner (e.g., "puas")
+ * @param repo The repository name (e.g., "pua-cli-internal")
  * @returns true if GitHub app is installed, false otherwise
  */
 export async function checkGithubAppInstalled(
@@ -81,7 +81,7 @@ export async function checkGithubAppInstalled(
   signal?: AbortSignal,
 ): Promise<boolean> {
   try {
-    const accessToken = getClaudeAIOAuthTokens()?.accessToken
+    const accessToken = getPUAAIOAuthTokens()?.accessToken
     if (!accessToken) {
       logForDebugging(
         'checkGithubAppInstalled: No access token found, assuming app not installed',
@@ -163,7 +163,7 @@ export async function checkGithubAppInstalled(
  */
 export async function checkGithubTokenSynced(): Promise<boolean> {
   try {
-    const accessToken = getClaudeAIOAuthTokens()?.accessToken
+    const accessToken = getPUAAIOAuthTokens()?.accessToken
     if (!accessToken) {
       logForDebugging('checkGithubTokenSynced: No access token found')
       return false

@@ -1292,7 +1292,7 @@ export async function powershellToolHasPermission(
   // succeeded; 'application' means a script/executable path, not a cmdlet.
   // SECURITY: Same argLeaksValue gate as the per-subcommand loop below
   // (finding #32). Without it, `PowerShell(Write-Output:*)` exact-matches
-  // `Write-Output $env:ANTHROPIC_API_KEY`, pushes allow to decisions[], and
+  // `Write-Output $env:PUA_API_KEY`, pushes allow to decisions[], and
   // reduce returns it before the per-subcommand gate ever runs. The
   // allSubCommands.every check ensures NO command in the statement leaks
   // (a single-command exact-allow has one element; a pipeline has several).
@@ -1471,7 +1471,7 @@ export async function powershellToolHasPermission(
       // SECURITY: User allow rule asserts the cmdlet is safe, NOT that
       // arbitrary variable expansion through it is safe. A user who allows
       // PowerShell(Write-Output:*) did not intend to auto-allow
-      // `Write-Output $env:ANTHROPIC_API_KEY`. Apply the same argLeaksValue
+      // `Write-Output $env:PUA_API_KEY`. Apply the same argLeaksValue
       // gate that protects the built-in allowlist path below — rejects
       // Variable/Other/ScriptBlock/SubExpression elementTypes and colon-bound
       // expression children. (security finding #32)
@@ -1546,10 +1546,10 @@ export async function powershellToolHasPermission(
     // cwd-changing command (Set-Location/Push-Location/Pop-Location). The
     // synthetic single-statement AST strips compound context, so
     // checkPermissionMode cannot see the cd in other statements. Without this
-    // gate, `Set-Location ./.claude; Set-Content ./settings.json '...'` would
+    // gate, `Set-Location ./.pua; Set-Content ./settings.json '...'` would
     // pass: Set-Content is checked in isolation, matches ACCEPT_EDITS_ALLOWED_CMDLETS,
     // and auto-allows — but PowerShell runs it from the changed cwd, writing to
-    // .claude/settings.json (a Claude config file the path validator didn't check).
+    // .pua/settings.json (a PUA config file the path validator didn't check).
     // This matches BashTool's compoundCommandHasCd guard.
     if (statement !== null && !hasCdSubCommand && !hasSymlinkCreate) {
       const subModeResult = checkPermissionMode(

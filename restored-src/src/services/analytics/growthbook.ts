@@ -158,11 +158,11 @@ export function onGrowthBookRefresh(
 
 /**
  * Parse env var overrides for GrowthBook features.
- * Set CLAUDE_INTERNAL_FC_OVERRIDES to a JSON object mapping feature keys to values
+ * Set PUA_INTERNAL_FC_OVERRIDES to a JSON object mapping feature keys to values
  * to bypass remote eval and disk cache. Useful for eval harnesses that need to
  * test specific feature flag configurations. Only active when USER_TYPE is 'ant'.
  *
- * Example: CLAUDE_INTERNAL_FC_OVERRIDES='{"my_feature": true, "my_config": {"key": "val"}}'
+ * Example: PUA_INTERNAL_FC_OVERRIDES='{"my_feature": true, "my_config": {"key": "val"}}'
  */
 let envOverrides: Record<string, unknown> | null = null
 let envOverridesParsed = false
@@ -171,7 +171,7 @@ function getEnvOverrides(): Record<string, unknown> | null {
   if (!envOverridesParsed) {
     envOverridesParsed = true
     if (process.env.USER_TYPE === 'ant') {
-      const raw = process.env.CLAUDE_INTERNAL_FC_OVERRIDES
+      const raw = process.env.PUA_INTERNAL_FC_OVERRIDES
       if (raw) {
         try {
           envOverrides = JSON.parse(raw) as Record<string, unknown>
@@ -181,7 +181,7 @@ function getEnvOverrides(): Record<string, unknown> | null {
         } catch {
           logError(
             new Error(
-              `GrowthBook: Failed to parse CLAUDE_INTERNAL_FC_OVERRIDES: ${raw}`,
+              `GrowthBook: Failed to parse PUA_INTERNAL_FC_OVERRIDES: ${raw}`,
             ),
           )
         }
@@ -192,7 +192,7 @@ function getEnvOverrides(): Record<string, unknown> | null {
 }
 
 /**
- * Check if a feature has an env-var override (CLAUDE_INTERNAL_FC_OVERRIDES).
+ * Check if a feature has an env-var override (PUA_INTERNAL_FC_OVERRIDES).
  * When true, _CACHED_MAY_BE_STALE will return the override without touching
  * disk or network — callers can skip awaiting init for that feature.
  */
@@ -334,7 +334,7 @@ async function processRemoteEvalPayload(
   // Empty object is truthy — without the length check, `{features: {}}`
   // (transient server bug, truncated response) would pass, clear the maps
   // below, return true, and syncRemoteEvalToDisk would wholesale-write `{}`
-  // to disk: total flag blackout for every process sharing ~/.claude.json.
+  // to disk: total flag blackout for every process sharing ~/.pua.json.
   if (!payload?.features || Object.keys(payload.features).length === 0) {
     return false
   }
@@ -425,23 +425,23 @@ function isGrowthBookEnabled(): boolean {
 }
 
 /**
- * Hostname of ANTHROPIC_BASE_URL when it points at a non-Anthropic proxy.
+ * Hostname of PUA_BASE_URL when it points at a non-PUA proxy.
  *
  * Enterprise-proxy deployments (Epic, Marble, etc.) typically use
- * apiKeyHelper auth, which means isAnthropicAuthEnabled() returns false and
+ * apiKeyHelper auth, which means isPUAAuthEnabled() returns false and
  * organizationUUID/accountUUID/email are all absent from GrowthBook
  * attributes. Without this, there's no stable attribute to target them on
- * — only per-device IDs. See src/utils/auth.ts isAnthropicAuthEnabled().
+ * — only per-device IDs. See src/utils/auth.ts isPUAAuthEnabled().
  *
- * Returns undefined for unset/default (api.anthropic.com) so the attribute
+ * Returns undefined for unset/default (api.pua.com) so the attribute
  * is absent for direct-API users. Hostname only — no path/query/creds.
  */
 export function getApiBaseUrlHost(): string | undefined {
-  const baseUrl = process.env.ANTHROPIC_BASE_URL
+  const baseUrl = process.env.PUA_BASE_URL
   if (!baseUrl) return undefined
   try {
     const host = new URL(baseUrl).host
-    if (host === 'api.anthropic.com') return undefined
+    if (host === 'api.pua.com') return undefined
     return host
   } catch {
     return undefined
@@ -454,7 +454,7 @@ export function getApiBaseUrlHost(): string | undefined {
 function getUserAttributes(): GrowthBookUserAttributes {
   const user = getUserForGrowthBook()
 
-  // For ants, always try to include email from OAuth config even if ANTHROPIC_API_KEY is set.
+  // For ants, always try to include email from OAuth config even if PUA_API_KEY is set.
   // This ensures GrowthBook targeting by email works regardless of auth method.
   let email = user.email
   if (!email && process.env.USER_TYPE === 'ant') {
@@ -502,8 +502,8 @@ const getGrowthBookClient = memoize(
     }
     const baseUrl =
       process.env.USER_TYPE === 'ant'
-        ? process.env.CLAUDE_CODE_GB_BASE_URL || 'https://api.anthropic.com/'
-        : 'https://api.anthropic.com/'
+        ? process.env.PUA_CODE_GB_BASE_URL || 'https://api.pua.com/'
+        : 'https://api.pua.com/'
 
     // Skip auth if trust hasn't been established yet
     // This prevents executing apiKeyHelper commands before the trust dialog

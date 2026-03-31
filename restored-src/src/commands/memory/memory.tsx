@@ -6,8 +6,8 @@ import { MemoryFileSelector } from '../../components/memory/MemoryFileSelector.j
 import { getRelativeMemoryPath } from '../../components/memory/MemoryUpdateNotification.js';
 import { Box, Link, Text } from '../../ink.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
-import { clearMemoryFileCaches, getMemoryFiles } from '../../utils/claudemd.js';
-import { getClaudeConfigHomeDir } from '../../utils/envUtils.js';
+import { clearMemoryFileCaches, getMemoryFiles } from '../../utils/puamd.js';
+import { getPUAConfigHomeDir } from '../../utils/envUtils.js';
 import { getErrnoCode } from '../../utils/errors.js';
 import { logError } from '../../utils/log.js';
 import { editFileInEditor } from '../../utils/promptEditor.js';
@@ -20,9 +20,9 @@ function MemoryCommand({
 }): React.ReactNode {
   const handleSelectMemoryFile = async (memoryPath: string) => {
     try {
-      // Create claude directory if it doesn't exist (idempotent with recursive)
-      if (memoryPath.includes(getClaudeConfigHomeDir())) {
-        await mkdir(getClaudeConfigHomeDir(), {
+      // Create pua directory if it doesn't exist (idempotent with recursive)
+      if (memoryPath.includes(getPUAConfigHomeDir())) {
+        await mkdir(getPUAConfigHomeDir(), {
           recursive: true
         });
       }
@@ -74,7 +74,7 @@ function MemoryCommand({
 
         <Box marginTop={1}>
           <Text dimColor>
-            Learn more: <Link url="https://code.claude.com/docs/en/memory" />
+            Learn more: <Link url="https://code.pua.com/docs/en/memory" />
           </Text>
         </Box>
       </Box>

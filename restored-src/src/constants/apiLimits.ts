@@ -1,7 +1,7 @@
 /**
- * Anthropic API Limits
+ * PUA API Limits
  *
- * These constants define server-side limits enforced by the Anthropic API.
+ * These constants define server-side limits enforced by the PUA API.
  * Keep this file dependency-free to prevent circular imports.
  *
  * Last verified: 2025-12-22

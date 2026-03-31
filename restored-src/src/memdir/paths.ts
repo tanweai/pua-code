@@ -7,7 +7,7 @@ import {
 } from '../bootstrap/state.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
-  getClaudeConfigHomeDir,
+  getPUAConfigHomeDir,
   isEnvDefinedFalsy,
   isEnvTruthy,
 } from '../utils/envUtils.js'
@@ -21,14 +21,14 @@ import {
 /**
  * Whether auto-memory features are enabled (memdir, agent memory, past session search).
  * Enabled by default. Priority chain (first defined wins):
- *   1. CLAUDE_CODE_DISABLE_AUTO_MEMORY env var (1/true → OFF, 0/false → ON)
- *   2. CLAUDE_CODE_SIMPLE (--bare) → OFF
- *   3. CCR without persistent storage → OFF (no CLAUDE_CODE_REMOTE_MEMORY_DIR)
+ *   1. PUA_CODE_DISABLE_AUTO_MEMORY env var (1/true → OFF, 0/false → ON)
+ *   2. PUA_CODE_SIMPLE (--bare) → OFF
+ *   3. CCR without persistent storage → OFF (no PUA_CODE_REMOTE_MEMORY_DIR)
  *   4. autoMemoryEnabled in settings.json (supports project-level opt-out)
  *   5. Default: enabled
  */
 export function isAutoMemoryEnabled(): boolean {
-  const envVal = process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY
+  const envVal = process.env.PUA_CODE_DISABLE_AUTO_MEMORY
   if (isEnvTruthy(envVal)) {
     return false
   }
@@ -38,12 +38,12 @@ export function isAutoMemoryEnabled(): boolean {
   // --bare / SIMPLE: prompts.ts already drops the memory section from the
   // system prompt via its SIMPLE early-return; this gate stops the other half
   // (extractMemories turn-end fork, autoDream, /remember, /dream, team sync).
-  if (isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
+  if (isEnvTruthy(process.env.PUA_CODE_SIMPLE)) {
     return false
   }
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) &&
-    !process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR
+    isEnvTruthy(process.env.PUA_CODE_REMOTE) &&
+    !process.env.PUA_CODE_REMOTE_MEMORY_DIR
   ) {
     return false
   }
@@ -79,14 +79,14 @@ export function isExtractModeActive(): boolean {
 /**
  * Returns the base directory for persistent memory storage.
  * Resolution order:
- *   1. CLAUDE_CODE_REMOTE_MEMORY_DIR env var (explicit override, set in CCR)
- *   2. ~/.claude (default config home)
+ *   1. PUA_CODE_REMOTE_MEMORY_DIR env var (explicit override, set in CCR)
+ *   2. ~/.pua (default config home)
  */
 export function getMemoryBaseDir(): string {
-  if (process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR) {
-    return process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR
+  if (process.env.PUA_CODE_REMOTE_MEMORY_DIR) {
+    return process.env.PUA_CODE_REMOTE_MEMORY_DIR
   }
-  return getClaudeConfigHomeDir()
+  return getPUAConfigHomeDir()
 }
 
 const AUTO_MEM_DIRNAME = 'memory'
@@ -160,7 +160,7 @@ function validateMemoryPath(
  */
 function getAutoMemPathOverride(): string | undefined {
   return validateMemoryPath(
-    process.env.CLAUDE_COWORK_MEMORY_PATH_OVERRIDE,
+    process.env.PUA_COWORK_MEMORY_PATH_OVERRIDE,
     false,
   )
 }
@@ -169,7 +169,7 @@ function getAutoMemPathOverride(): string | undefined {
  * Settings.json override for the full auto-memory directory path.
  * Supports ~/ expansion for user convenience.
  *
- * SECURITY: projectSettings (.claude/settings.json committed to the repo) is
+ * SECURITY: projectSettings (.pua/settings.json committed to the repo) is
  * intentionally excluded — a malicious repo could otherwise set
  * autoMemoryDirectory: "~/.ssh" and gain silent write access to sensitive
  * directories via the filesystem.ts write carve-out (which fires when
@@ -186,7 +186,7 @@ function getAutoMemPathSetting(): string | undefined {
 }
 
 /**
- * Check if CLAUDE_COWORK_MEMORY_PATH_OVERRIDE is set to a valid override.
+ * Check if PUA_COWORK_MEMORY_PATH_OVERRIDE is set to a valid override.
  * Use this as a signal that the SDK caller has explicitly opted into
  * the auto-memory mechanics — e.g. to decide whether to inject the
  * memory prompt when a custom system prompt replaces the default.
@@ -198,7 +198,7 @@ export function hasAutoMemPathOverride(): boolean {
 /**
  * Returns the canonical git repo root if available, otherwise falls back to
  * the stable project root. Uses findCanonicalGitRoot so all worktrees of the
- * same repo share one auto-memory directory (anthropics/claude-code#24382).
+ * same repo share one auto-memory directory (puas/pua-code#24382).
  */
 function getAutoMemBase(): string {
   return findCanonicalGitRoot(getProjectRoot()) ?? getProjectRoot()
@@ -208,7 +208,7 @@ function getAutoMemBase(): string {
  * Returns the auto-memory directory path.
  *
  * Resolution order:
- *   1. CLAUDE_COWORK_MEMORY_PATH_OVERRIDE env var (full-path override, used by Cowork)
+ *   1. PUA_COWORK_MEMORY_PATH_OVERRIDE env var (full-path override, used by Cowork)
  *   2. autoMemoryDirectory in settings.json (trusted sources only: policy/local/user)
  *   3. <memoryBase>/projects/<sanitized-git-root>/memory/
  *      where memoryBase is resolved by getMemoryBaseDir()
@@ -217,7 +217,7 @@ function getAutoMemBase(): string {
  * fire per tool-use message per Messages re-render; each miss costs
  * getSettingsForSource × 4 → parseSettingsFile (realpathSync + readFileSync).
  * Keyed on projectRoot so tests that change its mock mid-block recompute;
- * env vars / settings.json / CLAUDE_CONFIG_DIR are session-stable in
+ * env vars / settings.json / PUA_CONFIG_DIR are session-stable in
  * production and covered by per-test cache.clear.
  */
 export const getAutoMemPath = memoize(
@@ -261,7 +261,7 @@ export function getAutoMemEntrypoint(): string {
 /**
  * Check if an absolute path is within the auto-memory directory.
  *
- * When CLAUDE_COWORK_MEMORY_PATH_OVERRIDE is set, this matches against the
+ * When PUA_COWORK_MEMORY_PATH_OVERRIDE is set, this matches against the
  * env-var override directory. Note that a true return here does NOT imply
  * write permission in that case — the filesystem.ts write carve-out is gated
  * on !hasAutoMemPathOverride() (it exists to bypass DANGEROUS_DIRECTORIES).

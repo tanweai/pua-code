@@ -63,7 +63,7 @@ export class RemoteIO extends StructuredIO {
     }
 
     // Add environment runner version if available (set by Environment Manager)
-    const erVersion = process.env.CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION
+    const erVersion = process.env.PUA_CODE_ENVIRONMENT_RUNNER_VERSION
     if (erVersion) {
       headers['x-environment-runner-version'] = erVersion
     }
@@ -77,7 +77,7 @@ export class RemoteIO extends StructuredIO {
       if (freshToken) {
         h['Authorization'] = `Bearer ${freshToken}`
       }
-      const freshErVersion = process.env.CLAUDE_CODE_ENVIRONMENT_RUNNER_VERSION
+      const freshErVersion = process.env.PUA_CODE_ENVIRONMENT_RUNNER_VERSION
       if (freshErVersion) {
         h['x-environment-runner-version'] = freshErVersion
       }
@@ -93,7 +93,7 @@ export class RemoteIO extends StructuredIO {
     )
 
     // Set up data callback
-    this.isBridge = process.env.CLAUDE_CODE_ENVIRONMENT_KIND === 'bridge'
+    this.isBridge = process.env.PUA_CODE_ENVIRONMENT_KIND === 'bridge'
     this.isDebug = isDebugMode()
     this.transport.setOnData((data: string) => {
       this.inputStream.write(data)
@@ -113,7 +113,7 @@ export class RemoteIO extends StructuredIO {
     // synchronously, so new CCRClient() MUST run before transport.connect() —
     // otherwise early SSE frames hit an unwired onEventCallback and their
     // 'received' delivery acks are silently dropped.
-    if (isEnvTruthy(process.env.CLAUDE_CODE_USE_CCR_V2)) {
+    if (isEnvTruthy(process.env.PUA_CODE_USE_CCR_V2)) {
       // CCR v2 is SSE+POST by definition. getTransportForUrl returns
       // SSETransport under the same env var, but the two checks live in
       // different files — assert the invariant so a future decoupling

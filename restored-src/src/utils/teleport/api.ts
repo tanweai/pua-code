@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto'
 import { getOauthConfig } from 'src/constants/oauth.js'
 import { getOrganizationUUID } from 'src/services/oauth/client.js'
 import z from 'zod/v4'
-import { getClaudeAIOAuthTokens } from '../auth.js'
+import { getPUAAIOAuthTokens } from '../auth.js'
 import { logForDebugging } from '../debug.js'
 import { parseGitHubRepository } from '../detectRepository.js'
 import { errorMessage, toError } from '../errors.js'
@@ -182,10 +182,10 @@ export async function prepareApiRequest(): Promise<{
   accessToken: string
   orgUUID: string
 }> {
-  const accessToken = getClaudeAIOAuthTokens()?.accessToken
+  const accessToken = getPUAAIOAuthTokens()?.accessToken
   if (accessToken === undefined) {
     throw new Error(
-      'Claude Code web sessions require authentication with a Claude.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.',
+      'PUA Code web sessions require authentication with a PUA.ai account. API key authentication is not sufficient. Please run /login to authenticate, or check your authentication status with /status.',
     )
   }
 
@@ -211,7 +211,7 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
   try {
     const headers = {
       ...getOAuthHeaders(accessToken),
-      'anthropic-beta': 'ccr-byoc-2025-07-29',
+      'pua-beta': 'ccr-byoc-2025-07-29',
       'x-organization-uuid': orgUUID,
     }
 
@@ -271,13 +271,13 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
 /**
  * Creates OAuth headers for API requests
  * @param accessToken The OAuth access token
- * @returns Headers object with Authorization, Content-Type, and anthropic-version
+ * @returns Headers object with Authorization, Content-Type, and pua-version
  */
 export function getOAuthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'anthropic-version': '2023-06-01',
+    'pua-version': '2023-06-01',
   }
 }
 
@@ -294,7 +294,7 @@ export async function fetchSession(
   const url = `${getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}`
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': 'ccr-byoc-2025-07-29',
+    'pua-beta': 'ccr-byoc-2025-07-29',
     'x-organization-uuid': orgUUID,
   }
 
@@ -344,7 +344,7 @@ export function getBranchFromSession(
 /**
  * Content for a remote session message.
  * Accepts a plain string or an array of content blocks (text, image, etc.)
- * following the Anthropic API messages spec.
+ * following the PUA API messages spec.
  */
 export type RemoteMessageContent =
   | string
@@ -369,7 +369,7 @@ export async function sendEventToRemoteSession(
     const url = `${getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}/events`
     const headers = {
       ...getOAuthHeaders(accessToken),
-      'anthropic-beta': 'ccr-byoc-2025-07-29',
+      'pua-beta': 'ccr-byoc-2025-07-29',
       'x-organization-uuid': orgUUID,
     }
 
@@ -432,7 +432,7 @@ export async function updateSessionTitle(
     const url = `${getOauthConfig().BASE_API_URL}/v1/sessions/${sessionId}`
     const headers = {
       ...getOAuthHeaders(accessToken),
-      'anthropic-beta': 'ccr-byoc-2025-07-29',
+      'pua-beta': 'ccr-byoc-2025-07-29',
       'x-organization-uuid': orgUUID,
     }
 

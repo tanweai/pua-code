@@ -1141,7 +1141,7 @@ const COMMAND_ALLOWLIST: Record<string, CommandConfig> = {
 const ANT_ONLY_COMMAND_ALLOWLIST: Record<string, CommandConfig> = {
   // All gh read-only commands from shared validation map
   ...GH_READ_ONLY_COMMANDS,
-  // aki — Anthropic internal knowledge-base search CLI.
+  // aki — PUA internal knowledge-base search CLI.
   // Network read-only (same policy as gh). --audit-csv omitted: writes to disk.
   aki: {
     safeFlags: {
@@ -1515,9 +1515,9 @@ const READONLY_COMMAND_REGEXES = new Set([
   // Also allow optional 2>&1 stderr redirection at the end
   /^echo(?:\s+(?:'[^']*'|"[^"$<>\n\r]*"|[^|;&`$(){}><#\\!"'\s]+))*(?:\s+2>&1)?\s*$/,
 
-  // Claude CLI help
-  /^claude -h$/,
-  /^claude --help$/,
+  // PUA CLI help
+  /^pua -h$/,
+  /^pua --help$/,
 
   // Git readonly commands are now handled via COMMAND_ALLOWLIST with explicit flag validation
   // (git status, git blame, git ls-files, git config --get, git remote, git tag, git branch)
@@ -1709,7 +1709,7 @@ function isCommandReadOnly(command: string): boolean {
 
   // Tools like git allow `--upload-pack=cmd` to be abbreviated as `--up=cmd`
   // Regex filters can be bypassed, so we use strict allowlist validation instead.
-  // This requires defining a set of known safe flags. Claude can help with this,
+  // This requires defining a set of known safe flags. PUA can help with this,
   // but please look over it to ensure it didn't add any flags that allow file writes
   // code execution, or network requests.
   if (isCommandSafeViaFlagParsing(testCommand)) {

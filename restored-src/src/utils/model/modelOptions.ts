@@ -1,7 +1,7 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { getInitialMainLoopModel } from '../../bootstrap/state.js'
 import {
-  isClaudeAISubscriber,
+  isPUAAISubscriber,
   isMaxSubscriber,
   isTeamPremiumSubscriber,
 } from '../auth.js'
@@ -18,7 +18,7 @@ import { getAPIProvider } from './providers.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import {
   getCanonicalName,
-  getClaudeAiUserDefaultModelDescription,
+  getPUAAiUserDefaultModelDescription,
   getDefaultSonnetModel,
   getDefaultOpusModel,
   getDefaultHaikuModel,
@@ -56,11 +56,11 @@ export function getDefaultOptionForUser(fastMode = false): ModelOption {
   }
 
   // Subscribers
-  if (isClaudeAISubscriber()) {
+  if (isPUAAISubscriber()) {
     return {
       value: null,
       label: 'Default (recommended)',
-      description: getClaudeAiUserDefaultModelDescription(fastMode),
+      description: getPUAAiUserDefaultModelDescription(fastMode),
     }
   }
 
@@ -75,18 +75,18 @@ export function getDefaultOptionForUser(fastMode = false): ModelOption {
 
 function getCustomSonnetOption(): ModelOption | undefined {
   const is3P = getAPIProvider() !== 'firstParty'
-  const customSonnetModel = process.env.ANTHROPIC_DEFAULT_SONNET_MODEL
+  const customSonnetModel = process.env.PUA_DEFAULT_SONNET_MODEL
   // When a 3P user has a custom sonnet model string, show it directly
   if (is3P && customSonnetModel) {
     const is1m = has1mContext(customSonnetModel)
     return {
       value: 'sonnet',
       label:
-        process.env.ANTHROPIC_DEFAULT_SONNET_MODEL_NAME ?? customSonnetModel,
+        process.env.PUA_DEFAULT_SONNET_MODEL_NAME ?? customSonnetModel,
       description:
-        process.env.ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION ??
+        process.env.PUA_DEFAULT_SONNET_MODEL_DESCRIPTION ??
         `Custom Sonnet model${is1m ? ' (1M context)' : ''}`,
-      descriptionForModel: `${process.env.ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION ?? `Custom Sonnet model${is1m ? ' with 1M context' : ''}`} (${customSonnetModel})`,
+      descriptionForModel: `${process.env.PUA_DEFAULT_SONNET_MODEL_DESCRIPTION ?? `Custom Sonnet model${is1m ? ' with 1M context' : ''}`} (${customSonnetModel})`,
     }
   }
 }
@@ -106,17 +106,17 @@ function getSonnet46Option(): ModelOption {
 
 function getCustomOpusOption(): ModelOption | undefined {
   const is3P = getAPIProvider() !== 'firstParty'
-  const customOpusModel = process.env.ANTHROPIC_DEFAULT_OPUS_MODEL
+  const customOpusModel = process.env.PUA_DEFAULT_OPUS_MODEL
   // When a 3P user has a custom opus model string, show it directly
   if (is3P && customOpusModel) {
     const is1m = has1mContext(customOpusModel)
     return {
       value: 'opus',
-      label: process.env.ANTHROPIC_DEFAULT_OPUS_MODEL_NAME ?? customOpusModel,
+      label: process.env.PUA_DEFAULT_OPUS_MODEL_NAME ?? customOpusModel,
       description:
-        process.env.ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION ??
+        process.env.PUA_DEFAULT_OPUS_MODEL_DESCRIPTION ??
         `Custom Opus model${is1m ? ' (1M context)' : ''}`,
-      descriptionForModel: `${process.env.ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION ?? `Custom Opus model${is1m ? ' with 1M context' : ''}`} (${customOpusModel})`,
+      descriptionForModel: `${process.env.PUA_DEFAULT_OPUS_MODEL_DESCRIPTION ?? `Custom Opus model${is1m ? ' with 1M context' : ''}`} (${customOpusModel})`,
     }
   }
 }
@@ -164,16 +164,16 @@ export function getOpus46_1MOption(fastMode = false): ModelOption {
 
 function getCustomHaikuOption(): ModelOption | undefined {
   const is3P = getAPIProvider() !== 'firstParty'
-  const customHaikuModel = process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL
+  const customHaikuModel = process.env.PUA_DEFAULT_HAIKU_MODEL
   // When a 3P user has a custom haiku model string, show it directly
   if (is3P && customHaikuModel) {
     return {
       value: 'haiku',
-      label: process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME ?? customHaikuModel,
+      label: process.env.PUA_DEFAULT_HAIKU_MODEL_NAME ?? customHaikuModel,
       description:
-        process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION ??
+        process.env.PUA_DEFAULT_HAIKU_MODEL_DESCRIPTION ??
         'Custom Haiku model',
-      descriptionForModel: `${process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION ?? 'Custom Haiku model'} (${customHaikuModel})`,
+      descriptionForModel: `${process.env.PUA_DEFAULT_HAIKU_MODEL_DESCRIPTION ?? 'Custom Haiku model'} (${customHaikuModel})`,
     }
   }
 }
@@ -218,7 +218,7 @@ function getMaxOpusOption(fastMode = false): ModelOption {
 
 export function getMaxSonnet46_1MOption(): ModelOption {
   const is3P = getAPIProvider() !== 'firstParty'
-  const billingInfo = isClaudeAISubscriber() ? ' · Billed as extra usage' : ''
+  const billingInfo = isPUAAISubscriber() ? ' · Billed as extra usage' : ''
   return {
     value: 'sonnet[1m]',
     label: 'Sonnet (1M context)',
@@ -227,7 +227,7 @@ export function getMaxSonnet46_1MOption(): ModelOption {
 }
 
 export function getMaxOpus46_1MOption(fastMode = false): ModelOption {
-  const billingInfo = isClaudeAISubscriber() ? ' · Billed as extra usage' : ''
+  const billingInfo = isPUAAISubscriber() ? ' · Billed as extra usage' : ''
   return {
     value: 'opus[1m]',
     label: 'Opus (1M context)',
@@ -287,7 +287,7 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     ]
   }
 
-  if (isClaudeAISubscriber()) {
+  if (isPUAAISubscriber()) {
     if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
       // Max and Team Premium users: Opus is default, show Sonnet as alternative
       const premiumOptions = [getDefaultOptionForUser(fastMode)]
@@ -389,11 +389,11 @@ function getModelFamilyInfo(
 
   // Sonnet family
   if (
-    canonical.includes('claude-sonnet-4-6') ||
-    canonical.includes('claude-sonnet-4-5') ||
-    canonical.includes('claude-sonnet-4-') ||
-    canonical.includes('claude-3-7-sonnet') ||
-    canonical.includes('claude-3-5-sonnet')
+    canonical.includes('pua-sonnet-4-6') ||
+    canonical.includes('pua-sonnet-4-5') ||
+    canonical.includes('pua-sonnet-4-') ||
+    canonical.includes('pua-3-7-sonnet') ||
+    canonical.includes('pua-3-5-sonnet')
   ) {
     const currentName = getMarketingNameForModel(getDefaultSonnetModel())
     if (currentName) {
@@ -402,7 +402,7 @@ function getModelFamilyInfo(
   }
 
   // Opus family
-  if (canonical.includes('claude-opus-4')) {
+  if (canonical.includes('pua-opus-4')) {
     const currentName = getMarketingNameForModel(getDefaultOpusModel())
     if (currentName) {
       return { alias: 'Opus', currentVersionName: currentName }
@@ -411,8 +411,8 @@ function getModelFamilyInfo(
 
   // Haiku family
   if (
-    canonical.includes('claude-haiku') ||
-    canonical.includes('claude-3-5-haiku')
+    canonical.includes('pua-haiku') ||
+    canonical.includes('pua-3-5-haiku')
   ) {
     const currentName = getMarketingNameForModel(getDefaultHaikuModel())
     if (currentName) {
@@ -424,7 +424,7 @@ function getModelFamilyInfo(
 }
 
 /**
- * Returns a ModelOption for a known Anthropic model with a human-readable
+ * Returns a ModelOption for a known PUA model with a human-readable
  * label, and an upgrade hint if a newer version is available via the alias.
  * Returns null if the model is not recognized.
  */
@@ -461,17 +461,17 @@ function getKnownModelOption(model: string): ModelOption | null {
 export function getModelOptions(fastMode = false): ModelOption[] {
   const options = getModelOptionsBase(fastMode)
 
-  // Add the custom model from the ANTHROPIC_CUSTOM_MODEL_OPTION env var
-  const envCustomModel = process.env.ANTHROPIC_CUSTOM_MODEL_OPTION
+  // Add the custom model from the PUA_CUSTOM_MODEL_OPTION env var
+  const envCustomModel = process.env.PUA_CUSTOM_MODEL_OPTION
   if (
     envCustomModel &&
     !options.some(existing => existing.value === envCustomModel)
   ) {
     options.push({
       value: envCustomModel,
-      label: process.env.ANTHROPIC_CUSTOM_MODEL_OPTION_NAME ?? envCustomModel,
+      label: process.env.PUA_CUSTOM_MODEL_OPTION_NAME ?? envCustomModel,
       description:
-        process.env.ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION ??
+        process.env.PUA_CUSTOM_MODEL_OPTION_DESCRIPTION ??
         `Custom model (${envCustomModel})`,
     })
   }
@@ -508,7 +508,7 @@ export function getModelOptions(fastMode = false): ModelOption[] {
       getMergedOpus1MOption(fastMode),
     ])
   } else {
-    // Try to show a human-readable label for known Anthropic models, with an
+    // Try to show a human-readable label for known PUA models, with an
     // upgrade hint if the alias now resolves to a newer version.
     const knownOption = getKnownModelOption(customModel)
     if (knownOption) {

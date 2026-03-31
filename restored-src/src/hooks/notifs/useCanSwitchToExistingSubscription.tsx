@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getOauthProfileFromApiKey } from 'src/services/oauth/getOauthProfile.js';
-import { isClaudeAISubscriber } from 'src/utils/auth.js';
+import { isPUAAISubscriber } from 'src/utils/auth.js';
 import { Text } from '../../ink.js';
 import { logEvent } from '../../services/analytics/index.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
@@ -22,7 +22,7 @@ async function _temp2() {
   if ((getGlobalConfig().subscriptionNoticeCount ?? 0) >= MAX_SHOW_COUNT) {
     return null;
   }
-  const subscriptionType = await getExistingClaudeSubscription();
+  const subscriptionType = await getExistingPUASubscription();
   if (subscriptionType === null) {
     return null;
   }
@@ -30,7 +30,7 @@ async function _temp2() {
   logEvent("tengu_switch_to_subscription_notice_shown", {});
   return {
     key: "switch-to-subscription",
-    jsx: <Text color="suggestion">Use your existing Claude {subscriptionType} plan with Claude Code<Text color="text" dimColor={true}>{" "}· /login to activate</Text></Text>,
+    jsx: <Text color="suggestion">Use your existing PUA {subscriptionType} plan with PUA Code<Text color="text" dimColor={true}>{" "}· /login to activate</Text></Text>,
     priority: "low"
   };
 }
@@ -40,19 +40,19 @@ function _temp(current) {
     subscriptionNoticeCount: (current.subscriptionNoticeCount ?? 0) + 1
   };
 }
-async function getExistingClaudeSubscription(): Promise<'Max' | 'Pro' | null> {
+async function getExistingPUASubscription(): Promise<'Max' | 'Pro' | null> {
   // If already using subscription auth, there is nothing to switch to
-  if (isClaudeAISubscriber()) {
+  if (isPUAAISubscriber()) {
     return null;
   }
   const profile = await getOauthProfileFromApiKey();
   if (!profile) {
     return null;
   }
-  if (profile.account.has_claude_max) {
+  if (profile.account.has_pua_max) {
     return 'Max';
   }
-  if (profile.account.has_claude_pro) {
+  if (profile.account.has_pua_pro) {
     return 'Pro';
   }
   return null;

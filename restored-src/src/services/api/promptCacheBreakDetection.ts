@@ -1,5 +1,5 @@
-import type { BetaToolUnion } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { BetaToolUnion } from '@pua-ai/sdk/resources/beta/messages/messages.mjs'
+import type { TextBlockParam } from '@pua-ai/sdk/resources/index.mjs'
 import { createPatch } from 'diff'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -8,7 +8,7 @@ import type { Message } from 'src/types/message.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { djb2Hash } from 'src/utils/hash.js'
 import { logError } from 'src/utils/log.js'
-import { getClaudeTempDir } from 'src/utils/permissions/filesystem.js'
+import { getPUATempDir } from 'src/utils/permissions/filesystem.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import type { QuerySource } from '../../constants/querySource.js'
 import {
@@ -22,7 +22,7 @@ function getCacheBreakDiffPath(): string {
   for (let i = 0; i < 4; i++) {
     suffix += chars[Math.floor(Math.random() * chars.length)]
   }
-  return join(getClaudeTempDir(), `cache-break-${suffix}.diff`)
+  return join(getPUATempDir(), `cache-break-${suffix}.diff`)
 }
 
 type PreviousState = {
@@ -45,19 +45,19 @@ type PreviousState = {
   /** Sorted beta header list. Diffed to show which headers were added/removed. */
   betas: string[]
   /** AFK_MODE_BETA_HEADER presence — should NOT break cache anymore
-   *  (sticky-on latched in claude.ts). Tracked to verify the fix. */
+   *  (sticky-on latched in pua.ts). Tracked to verify the fix. */
   autoModeActive: boolean
   /** Overage state flip — should NOT break cache anymore (eligibility is
    *  latched session-stable in should1hCacheTTL). Tracked to verify the fix. */
   isUsingOverage: boolean
   /** Cache-editing beta header presence — should NOT break cache anymore
-   *  (sticky-on latched in claude.ts). Tracked to verify the fix. */
+   *  (sticky-on latched in pua.ts). Tracked to verify the fix. */
   cachedMCEnabled: boolean
   /** Resolved effort (env → options → model default). Goes into output_config
-   *  or anthropic_internal.effort_override. */
+   *  or pua_internal.effort_override. */
   effortValue: string
-  /** Hash of getExtraBodyParams() — catches CLAUDE_CODE_EXTRA_BODY and
-   *  anthropic_internal changes. */
+  /** Hash of getExtraBodyParams() — catches PUA_CODE_EXTRA_BODY and
+   *  pua_internal changes. */
   extraBodyHash: number
   callCount: number
   pendingChanges: PendingChanges | null
@@ -119,7 +119,7 @@ const TRACKED_SOURCE_PREFIXES = [
 // and aren't worth alerting on.
 const MIN_CACHE_MISS_TOKENS = 2_000
 
-// Anthropic's server-side prompt cache TTL thresholds to test.
+// PUA's server-side prompt cache TTL thresholds to test.
 // Cache breaks after these durations are likely due to TTL expiration
 // rather than client-side changes.
 const CACHE_TTL_5MIN_MS = 5 * 60 * 1000
@@ -711,7 +711,7 @@ async function writeCacheBreakDiff(
 ): Promise<string | undefined> {
   try {
     const diffPath = getCacheBreakDiffPath()
-    await mkdir(getClaudeTempDir(), { recursive: true })
+    await mkdir(getPUATempDir(), { recursive: true })
     const patch = createPatch(
       'prompt-state',
       prevContent,

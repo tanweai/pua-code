@@ -1,5 +1,5 @@
 import {
-  getClaudeAiBaseUrl,
+  getPUAAiBaseUrl,
   getRemoteSessionUrl,
 } from '../constants/product.js'
 import { stringWidth } from '../ink/stringWidth.js'
@@ -40,7 +40,7 @@ export function buildBridgeConnectUrl(
   environmentId: string,
   ingressUrl?: string,
 ): string {
-  const baseUrl = getClaudeAiBaseUrl(undefined, ingressUrl)
+  const baseUrl = getPUAAiBaseUrl(undefined, ingressUrl)
   return `${baseUrl}/code?bridge=${environmentId}`
 }
 
@@ -142,12 +142,12 @@ export function getBridgeStatus({
 
 /** Footer text shown when bridge is idle (Ready state). */
 export function buildIdleFooterText(url: string): string {
-  return `Code everywhere with the Claude app or ${url}`
+  return `Code everywhere with the PUA app or ${url}`
 }
 
 /** Footer text shown when a session is active (Connected state). */
 export function buildActiveFooterText(url: string): string {
-  return `Continue coding in the Claude app or ${url}`
+  return `Continue coding in the PUA app or ${url}`
 }
 
 /** Footer text shown when the bridge has failed. */

@@ -1,7 +1,7 @@
 /**
  * Download functionality for native installer
  *
- * Handles downloading Claude binaries from various sources:
+ * Handles downloading PUA binaries from various sources:
  * - Artifactory NPM packages
  * - GCS bucket
  */
@@ -23,7 +23,7 @@ import { jsonStringify, writeFileSync_DEPRECATED } from '../slowOperations.js'
 import { getBinaryName, getPlatform } from './installer.js'
 
 const GCS_BUCKET_URL =
-  'https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases'
+  'https://storage.googleapis.com/pua-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/pua-code-releases'
 export const ARTIFACTORY_REGISTRY_URL =
   'https://artifactory.infra.ant.dev/artifactory/api/npm/npm-all/'
 
@@ -201,7 +201,7 @@ export async function downloadVersionFromArtifactory(
   await fs.mkdir(stagingPath)
 
   const packageJson = {
-    name: 'claude-native-installer',
+    name: 'pua-native-installer',
     version: '0.0.1',
     dependencies: {
       [MACRO.NATIVE_PACKAGE_URL!]: version,
@@ -210,13 +210,13 @@ export async function downloadVersionFromArtifactory(
 
   // Create package-lock.json with integrity verification for platform-specific package
   const packageLock = {
-    name: 'claude-native-installer',
+    name: 'pua-native-installer',
     version: '0.0.1',
     lockfileVersion: 3,
     requires: true,
     packages: {
       '': {
-        name: 'claude-native-installer',
+        name: 'pua-native-installer',
         version: '0.0.1',
         dependencies: {
           [MACRO.NATIVE_PACKAGE_URL!]: version,
@@ -274,7 +274,7 @@ const MAX_DOWNLOAD_RETRIES = 3
 
 function getStallTimeoutMs(): number {
   return (
-    Number(process.env.CLAUDE_CODE_STALL_TIMEOUT_MS_FOR_TESTING) ||
+    Number(process.env.PUA_CODE_STALL_TIMEOUT_MS_FOR_TESTING) ||
     DEFAULT_STALL_TIMEOUT_MS
   )
 }
@@ -489,7 +489,7 @@ export async function downloadVersion(
   stagingPath: string,
 ): Promise<'npm' | 'binary'> {
   // Test-fixture versions route to the private sentinel bucket. DCE'd in all
-  // shipped builds — the string 'claude-code-ci-sentinel' and the gcloud call
+  // shipped builds — the string 'pua-code-ci-sentinel' and the gcloud call
   // never exist in compiled binaries. Same gcloud-token pattern as
   // remoteSkillLoader.ts:175-195.
   if (feature('ALLOW_TEST_VERSIONS') && /^99\.99\./.test(version)) {
@@ -500,7 +500,7 @@ export async function downloadVersion(
     await downloadVersionFromBinaryRepo(
       version,
       stagingPath,
-      'https://storage.googleapis.com/claude-code-ci-sentinel',
+      'https://storage.googleapis.com/pua-code-ci-sentinel',
       { headers: { Authorization: `Bearer ${stdout.trim()}` } },
     )
     return 'binary'

@@ -109,12 +109,12 @@ function pollSleepDetectionThresholdMs(backoff: BackoffConfig): number {
 }
 
 /**
- * Returns the args that must precede CLI flags when spawning a child claude
- * process. In compiled binaries, process.execPath is the claude binary itself
+ * Returns the args that must precede CLI flags when spawning a child pua
+ * process. In compiled binaries, process.execPath is the pua binary itself
  * and args go directly to it. In npm installs (node running cli.js),
  * process.execPath is the node runtime — the child spawn must pass the script
  * path as the first arg, otherwise node interprets --sdk-url as a node option
- * and exits with "bad option: --sdk-url". See anthropics/claude-code#28334.
+ * and exits with "bad option: --sdk-url". See puas/pua-code#28334.
  */
 function spawnScriptArgs(): string[] {
   if (isInBundledMode() || !process.argv[1]) {
@@ -349,7 +349,7 @@ export async function runBridgeLoop(
           ? `${config.debugFile.slice(0, ext)}-*${config.debugFile.slice(ext)}`
           : `${config.debugFile}-*`
     } else {
-      debugGlob = join(tmpdir(), 'claude', 'bridge-session-*.log')
+      debugGlob = join(tmpdir(), 'pua', 'bridge-session-*.log')
     }
     logger.setDebugLogPath(debugGlob)
   }
@@ -913,7 +913,7 @@ export async function runBridgeLoop(
           // ant-dev override (e.g. forcing v2 before the server flag is on).
           if (
             secret.use_code_sessions === true ||
-            isEnvTruthy(process.env.CLAUDE_BRIDGE_USE_CCR_V2)
+            isEnvTruthy(process.env.PUA_BRIDGE_USE_CCR_V2)
           ) {
             sdkUrl = buildCCRv2SdkUrl(config.apiBaseUrl, sessionId)
             // Retry once on transient failure (network blip, 500) before
@@ -1135,7 +1135,7 @@ export async function runBridgeLoop(
           } else if (config.verbose || process.env.USER_TYPE === 'ant') {
             sessionDebugFile = join(
               tmpdir(),
-              'claude',
+              'pua',
               `bridge-session-${safeId}.log`,
             )
           }
@@ -1513,7 +1513,7 @@ export async function runBridgeLoop(
   }
 
   // In single-session mode with a known session, leave the session and
-  // environment alive so `claude remote-control --session-id=<id>` can resume.
+  // environment alive so `pua remote-control --session-id=<id>` can resume.
   // The backend GCs stale environments via a 4h TTL (BRIDGE_LAST_POLL_TTL).
   // Archiving the session or deregistering the environment would make the
   // printed resume command a lie — deregister deletes Firestore + Redis stream.
@@ -1529,7 +1529,7 @@ export async function runBridgeLoop(
     !fatalExit
   ) {
     logger.logStatus(
-      `Resume this session by running \`claude remote-control --continue\``,
+      `Resume this session by running \`pua remote-control --continue\``,
     )
     logForDebugging(
       `[bridge:shutdown] Skipping archive+deregister to allow resume of session ${initialSessionId}`,
@@ -1820,7 +1820,7 @@ export function parseArgs(args: string[]): ParsedArgs {
       createSessionInDir = false
     } else {
       return makeError(
-        `Unknown argument: ${arg}\nRun 'claude remote-control --help' for usage.`,
+        `Unknown argument: ${arg}\nRun 'pua remote-control --help' for usage.`,
       )
     }
   }
@@ -1918,12 +1918,12 @@ async function printHelp(): Promise<void> {
 `
     : ''
   const help = `
-Remote Control - Connect your local environment to claude.ai/code
+Remote Control - Connect your local environment to pua.ai/code
 
 USAGE
-  claude remote-control [options]
+  pua remote-control [options]
 OPTIONS
-  --name <name>                    Name for the session (shown in claude.ai/code)
+  --name <name>                    Name for the session (shown in pua.ai/code)
 ${
   feature('KAIROS')
     ? `  -c, --continue                   Resume the last session in this directory
@@ -1939,12 +1939,12 @@ ${
 ${serverOptions}
 DESCRIPTION
   Remote Control allows you to control sessions on your local device from
-  claude.ai/code (https://claude.ai/code). Run this command in the
-  directory you want to work in, then connect from the Claude app or web.
+  pua.ai/code (https://pua.ai/code). Run this command in the
+  directory you want to work in, then connect from the PUA app or web.
 ${serverDescription}
 NOTES
-  - You must be logged in with a Claude account that has a subscription
-  - Run \`claude\` first in the directory to accept the workspace trust dialog
+  - You must be logged in with a PUA account that has a subscription
+  - Run \`pua\` first in the directory to accept the workspace trust dialog
 ${serverNote}`
   // biome-ignore lint/suspicious/noConsole: intentional help output
   console.log(help)
@@ -2082,11 +2082,11 @@ export async function bridgeMain(args: string[]): Promise<void> {
   setCwdState(dir)
 
   // The bridge bypasses main.tsx (which renders the interactive TrustDialog via showSetupScreens),
-  // so we must verify trust was previously established by a normal `claude` session.
+  // so we must verify trust was previously established by a normal `pua` session.
   if (!checkHasTrustDialogAccepted()) {
     // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.error(
-      `Error: Workspace not trusted. Please run \`claude\` in ${dir} first to review and accept the workspace trust dialog.`,
+      `Error: Workspace not trusted. Please run \`pua\` in ${dir} first to review and accept the workspace trust dialog.`,
     )
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
@@ -2122,7 +2122,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     })
     // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log(
-      '\nRemote Control lets you access this CLI session from the web (claude.ai/code)\nor the Claude app, so you can pick up where you left off on any device.\n\nYou can disconnect remote access anytime by running /remote-control again.\n',
+      '\nRemote Control lets you access this CLI session from the web (pua.ai/code)\nor the PUA app, so you can pick up where you left off on any device.\n\nYou can disconnect remote access anytime by running /remote-control again.\n',
     )
     const answer = await new Promise<string>(resolve => {
       rl.question('Enable Remote Control? (y/n) ', resolve)
@@ -2154,7 +2154,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     if (!found) {
       // biome-ignore lint/suspicious/noConsole: intentional error output
       console.error(
-        `Error: No recent session found in this directory or its worktrees. Run \`claude remote-control\` to start a new one.`,
+        `Error: No recent session found in this directory or its worktrees. Run \`pua remote-control\` to start a new one.`,
       )
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
@@ -2174,8 +2174,8 @@ export async function bridgeMain(args: string[]): Promise<void> {
     resumePointerDir = pointerDir
   }
 
-  // In production, baseUrl is the Anthropic API (from OAuth config).
-  // CLAUDE_BRIDGE_BASE_URL overrides this for ant local dev only.
+  // In production, baseUrl is the PUA API (from OAuth config).
+  // PUA_BRIDGE_BASE_URL overrides this for ant local dev only.
   const baseUrl = getBridgeBaseUrl()
 
   // For non-localhost targets, require HTTPS to protect credentials.
@@ -2195,12 +2195,12 @@ export async function bridgeMain(args: string[]): Promise<void> {
   // Session ingress URL for WebSocket connections. In production this is the
   // same as baseUrl (Envoy routes /v1/session_ingress/* to session-ingress).
   // Locally, session-ingress runs on a different port (9413) than the
-  // contain-provide-api (8211), so CLAUDE_BRIDGE_SESSION_INGRESS_URL must be
-  // set explicitly. Ant-only, matching CLAUDE_BRIDGE_BASE_URL.
+  // contain-provide-api (8211), so PUA_BRIDGE_SESSION_INGRESS_URL must be
+  // set explicitly. Ant-only, matching PUA_BRIDGE_BASE_URL.
   const sessionIngressUrl =
     process.env.USER_TYPE === 'ant' &&
-    process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
-      ? process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
+    process.env.PUA_BRIDGE_SESSION_INGRESS_URL
+      ? process.env.PUA_BRIDGE_SESSION_INGRESS_URL
       : baseUrl
 
   const { getBranch, getRemoteUrl, findGitRoot } = await import(
@@ -2252,7 +2252,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     })
     // biome-ignore lint/suspicious/noConsole: intentional dialog output
     console.log(
-      `\nClaude Remote Control is launching in spawn mode which lets you create new sessions in this project from Claude Code on Web or your Mobile app. Learn more here: https://code.claude.com/docs/en/remote-control\n\n` +
+      `\nPUA Remote Control is launching in spawn mode which lets you create new sessions in this project from PUA Code on Web or your Mobile app. Learn more here: https://code.pua.com/docs/en/remote-control\n\n` +
         `Spawn mode for this project:\n` +
         `  [1] same-dir \u2014 sessions share the current directory (default)\n` +
         `  [2] worktree \u2014 each session gets an isolated git worktree\n\n` +
@@ -2392,7 +2392,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       }
       // biome-ignore lint/suspicious/noConsole: intentional error output
       console.error(
-        `Error: Session ${resumeSessionId} not found. It may have been archived or expired, or your login may have lapsed (run \`claude /login\`).`,
+        `Error: Session ${resumeSessionId} not found. It may have been archived or expired, or your login may have lapsed (run \`pua /login\`).`,
       )
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
@@ -2425,7 +2425,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     verbose,
     sandbox,
     bridgeId,
-    workerType: 'claude_code',
+    workerType: 'pua_code',
     environmentId: randomUUID(),
     reuseEnvironmentId,
     apiBaseUrl: baseUrl,
@@ -2830,7 +2830,7 @@ export async function runBridgeHeadless(
 
   if (!checkHasTrustDialogAccepted()) {
     throw new BridgeHeadlessPermanentError(
-      `Workspace not trusted: ${dir}. Run \`claude\` in that directory first to accept the trust dialog.`,
+      `Workspace not trusted: ${dir}. Run \`pua\` in that directory first to accept the trust dialog.`,
     )
   }
 
@@ -2852,8 +2852,8 @@ export async function runBridgeHeadless(
   }
   const sessionIngressUrl =
     process.env.USER_TYPE === 'ant' &&
-    process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
-      ? process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
+    process.env.PUA_BRIDGE_SESSION_INGRESS_URL
+      ? process.env.PUA_BRIDGE_SESSION_INGRESS_URL
       : baseUrl
 
   const { getBranch, getRemoteUrl, findGitRoot } = await import(
@@ -2886,7 +2886,7 @@ export async function runBridgeHeadless(
     verbose: false,
     sandbox: opts.sandbox,
     bridgeId,
-    workerType: 'claude_code',
+    workerType: 'pua_code',
     environmentId: randomUUID(),
     apiBaseUrl: baseUrl,
     sessionIngressUrl,

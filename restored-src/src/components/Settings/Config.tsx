@@ -21,13 +21,13 @@ import { useAppState, useSetAppState, useAppStateStore } from '../../state/AppSt
 import { ModelPicker } from '../ModelPicker.js';
 import { modelDisplayString, isOpus1mMergeEnabled } from '../../utils/model/model.js';
 import { isBilledAsExtraUsage } from '../../utils/extraUsage.js';
-import { ClaudeMdExternalIncludesDialog } from '../ClaudeMdExternalIncludesDialog.js';
+import { PUAMdExternalIncludesDialog } from '../PUAMdExternalIncludesDialog.js';
 import { ChannelDowngradeDialog, type ChannelDowngradeChoice } from '../ChannelDowngradeDialog.js';
 import { Dialog } from '../design-system/Dialog.js';
 import { Select } from '../CustomSelect/index.js';
 import { OutputStylePicker } from '../OutputStylePicker.js';
 import { LanguagePicker } from '../LanguagePicker.js';
-import { getExternalClaudeMdIncludes, getMemoryFiles, hasExternalClaudeMdIncludes } from 'src/utils/claudemd.js';
+import { getExternalPUAMdIncludes, getMemoryFiles, hasExternalPUAMdIncludes } from 'src/utils/puamd.js';
 import { KeyboardShortcutHint } from '../design-system/KeyboardShortcutHint.js';
 import { ConfigurableShortcutHint } from '../ConfigurableShortcutHint.js';
 import { Byline } from '../design-system/Byline.js';
@@ -196,9 +196,9 @@ export function Config({
     onIsSearchModeChange?.(ownsEsc);
   }, [ownsEsc, onIsSearchModeChange]);
   const isConnectedToIde = hasAccessToIDEExtensionDiffFeature(context.options.mcpClients);
-  const isFileCheckpointingAvailable = !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING);
+  const isFileCheckpointingAvailable = !isEnvTruthy(process.env.PUA_CODE_DISABLE_FILE_CHECKPOINTING);
   const memoryFiles = React.use(getMemoryFiles(true));
-  const shouldShowExternalIncludesToggle = hasExternalClaudeMdIncludes(memoryFiles);
+  const shouldShowExternalIncludesToggle = hasExternalPUAMdIncludes(memoryFiles);
   const autoUpdaterDisabledReason = getAutoUpdaterDisabledReason();
   function onChangeMainModelConfig(value: string | null): void {
     const previousModel = mainLoopModel;
@@ -701,7 +701,7 @@ export function Config({
     }
   }, {
     id: 'agentPushNotifEnabled',
-    label: 'Push when Claude decides',
+    label: 'Push when PUA decides',
     value: globalConfig.agentPushNotifEnabled ?? false,
     type: 'boolean' as const,
     onChange(agentPushNotifEnabled: boolean) {
@@ -872,20 +872,20 @@ export function Config({
       });
     }
   }] : []), {
-    id: 'claudeInChromeDefaultEnabled',
-    label: 'Claude in Chrome enabled by default',
-    value: globalConfig.claudeInChromeDefaultEnabled ?? true,
+    id: 'puaInChromeDefaultEnabled',
+    label: 'PUA in Chrome enabled by default',
+    value: globalConfig.puaInChromeDefaultEnabled ?? true,
     type: 'boolean' as const,
     onChange(enabled_5: boolean) {
       saveGlobalConfig(current_18 => ({
         ...current_18,
-        claudeInChromeDefaultEnabled: enabled_5
+        puaInChromeDefaultEnabled: enabled_5
       }));
       setGlobalConfig({
         ...getGlobalConfig(),
-        claudeInChromeDefaultEnabled: enabled_5
+        puaInChromeDefaultEnabled: enabled_5
       });
-      logEvent('tengu_claude_in_chrome_setting_changed', {
+      logEvent('tengu_pua_in_chrome_setting_changed', {
         enabled: enabled_5
       });
     }
@@ -975,10 +975,10 @@ export function Config({
     }
   }] : []), ...(shouldShowExternalIncludesToggle ? [{
     id: 'showExternalIncludesDialog',
-    label: 'External CLAUDE.md includes',
+    label: 'External PUA.md includes',
     value: (() => {
       const projectConfig = getCurrentProjectConfig();
-      if (projectConfig.hasClaudeMdExternalIncludesApproved) {
+      if (projectConfig.hasPUAMdExternalIncludesApproved) {
         return 'true';
       } else {
         return 'false';
@@ -988,16 +988,16 @@ export function Config({
     onChange() {
       // Will be handled by toggleSetting function
     }
-  }] : []), ...(process.env.ANTHROPIC_API_KEY && !isRunningOnHomespace() ? [{
+  }] : []), ...(process.env.PUA_API_KEY && !isRunningOnHomespace() ? [{
     id: 'apiKey',
     label: <Text>
                 Use custom API key:{' '}
                 <Text bold>
-                  {normalizeApiKeyForConfig(process.env.ANTHROPIC_API_KEY)}
+                  {normalizeApiKeyForConfig(process.env.PUA_API_KEY)}
                 </Text>
               </Text>,
     searchText: 'Use custom API key',
-    value: Boolean(process.env.ANTHROPIC_API_KEY && globalConfig.customApiKeyResponses?.approved?.includes(normalizeApiKeyForConfig(process.env.ANTHROPIC_API_KEY))),
+    value: Boolean(process.env.PUA_API_KEY && globalConfig.customApiKeyResponses?.approved?.includes(normalizeApiKeyForConfig(process.env.PUA_API_KEY))),
     type: 'boolean' as const,
     onChange(useCustomKey: boolean) {
       saveGlobalConfig(current_22 => {
@@ -1022,8 +1022,8 @@ export function Config({
             rejected: []
           };
         }
-        if (process.env.ANTHROPIC_API_KEY) {
-          const truncatedKey = normalizeApiKeyForConfig(process.env.ANTHROPIC_API_KEY);
+        if (process.env.PUA_API_KEY) {
+          const truncatedKey = normalizeApiKeyForConfig(process.env.PUA_API_KEY);
           if (useCustomKey) {
             updated.customApiKeyResponses = {
               ...updated.customApiKeyResponses,
@@ -1100,15 +1100,15 @@ export function Config({
       return `Set ${key} to ${chalk.bold(value_2)}`;
     });
     // Check for API key changes
-    // On homespace, ANTHROPIC_API_KEY is preserved in process.env for child
-    // processes but ignored by Claude Code itself (see auth.ts).
-    const effectiveApiKey = isRunningOnHomespace() ? undefined : process.env.ANTHROPIC_API_KEY;
+    // On homespace, PUA_API_KEY is preserved in process.env for child
+    // processes but ignored by PUA Code itself (see auth.ts).
+    const effectiveApiKey = isRunningOnHomespace() ? undefined : process.env.PUA_API_KEY;
     const initialUsingCustomKey = Boolean(effectiveApiKey && initialConfig.current.customApiKeyResponses?.approved?.includes(normalizeApiKeyForConfig(effectiveApiKey)));
     const currentUsingCustomKey = Boolean(effectiveApiKey && globalConfig.customApiKeyResponses?.approved?.includes(normalizeApiKeyForConfig(effectiveApiKey)));
     if (initialUsingCustomKey !== currentUsingCustomKey) {
       formattedChanges.push(`${currentUsingCustomKey ? 'Enabled' : 'Disabled'} custom API key`);
       logEvent('tengu_config_changed', {
-        key: 'env.ANTHROPIC_API_KEY' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+        key: 'env.PUA_API_KEY' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         value: currentUsingCustomKey as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
     }
@@ -1519,10 +1519,10 @@ export function Config({
             </Byline>
           </Text>
         </> : showSubmenu === 'ExternalIncludes' ? <>
-          <ClaudeMdExternalIncludesDialog onDone={() => {
+          <PUAMdExternalIncludesDialog onDone={() => {
         setShowSubmenu(null);
         setTabsHidden(false);
-      }} externalIncludes={getExternalClaudeMdIncludes(memoryFiles)} />
+      }} externalIncludes={getExternalPUAMdIncludes(memoryFiles)} />
           <Text dimColor>
             <Byline>
               <KeyboardShortcutHint shortcut="Enter" action="confirm" />

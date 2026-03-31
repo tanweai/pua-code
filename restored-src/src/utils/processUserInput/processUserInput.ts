@@ -3,7 +3,7 @@ import type {
   Base64ImageSource,
   ContentBlockParam,
   ImageBlockParam,
-} from '@anthropic-ai/sdk/resources/messages.mjs'
+} from '@pua-ai/sdk/resources/messages.mjs'
 import { randomUUID } from 'crypto'
 import type { QuerySource } from 'src/constants/querySource.js'
 import { logEvent } from 'src/services/analytics/index.js'
@@ -355,7 +355,7 @@ async function processUserInputBase(
     : []
   const imagePasteIds = imageContents.map(img => img.id)
 
-  // Store images to disk so Claude can reference the path in context
+  // Store images to disk so PUA can reference the path in context
   // (for manipulation with CLI tools, uploading to PRs, etc.)
   const storedImagePaths = pastedContents
     ? await storeImages(pastedContents)

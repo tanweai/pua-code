@@ -7,7 +7,7 @@
  *
  * Eligibility:
  * - Console users (API key): All eligible
- * - OAuth users (Claude.ai): Only Enterprise/C4E and Team subscribers are eligible
+ * - OAuth users (PUA.ai): Only Enterprise/C4E and Team subscribers are eligible
  * - API fails open (non-blocking) - if fetch fails, continues without remote settings
  * - API returns empty settings for users without managed settings
  */
@@ -18,8 +18,8 @@ import { open, unlink } from 'fs/promises'
 import { getOauthConfig, OAUTH_BETA_HEADER } from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getAnthropicApiKeyWithSource,
-  getClaudeAIOAuthTokens,
+  getPUAApiKeyWithSource,
+  getPUAAIOAuthTokens,
 } from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -31,7 +31,7 @@ import {
 } from '../../utils/settings/types.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getPUACodeUserAgent } from '../../utils/userAgent.js'
 import { getRetryDelay } from '../api/withRetry.js'
 import {
   checkManagedSettingsSecurity,
@@ -103,7 +103,7 @@ export function initializeRemoteManagedSettingsLoadingPromise(): void {
  * Uses the OAuth config base API URL
  */
 function getRemoteManagedSettingsEndpoint() {
-  return `${getOauthConfig().BASE_API_URL}/api/claude_code/settings`
+  return `${getOauthConfig().BASE_API_URL}/api/pua_code/settings`
 }
 
 /**
@@ -169,9 +169,9 @@ function getRemoteSettingsAuthHeaders(): {
 } {
   // Try API key first (for Console users)
   // Skip apiKeyHelper to avoid circular dependency with getSettings()
-  // Wrap in try-catch because getAnthropicApiKeyWithSource throws in CI/test environments
+  // Wrap in try-catch because getPUAApiKeyWithSource throws in CI/test environments
   try {
-    const { key: apiKey } = getAnthropicApiKeyWithSource({
+    const { key: apiKey } = getPUAApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -185,13 +185,13 @@ function getRemoteSettingsAuthHeaders(): {
     // No API key available - continue to check OAuth
   }
 
-  // Fall back to OAuth tokens (for Claude.ai users)
-  const oauthTokens = getClaudeAIOAuthTokens()
+  // Fall back to OAuth tokens (for PUA.ai users)
+  const oauthTokens = getPUAAIOAuthTokens()
   if (oauthTokens?.accessToken) {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
+        'pua-beta': OAUTH_BETA_HEADER,
       },
     }
   }
@@ -267,7 +267,7 @@ async function fetchRemoteManagedSettings(
     const endpoint = getRemoteManagedSettingsEndpoint()
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
+      'User-Agent': getPUACodeUserAgent(),
     }
 
     // Add If-None-Match header for ETag-based caching

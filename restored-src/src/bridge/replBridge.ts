@@ -114,7 +114,7 @@ export type BridgeCoreParams = {
    * (HTTP-only, orgUUID+model supplied by the daemon caller).
    *
    * Receives `gitRepoUrl`+`branch` so the REPL wrapper can build the git
-   * source/outcome for claude.ai's session card. Daemon ignores them.
+   * source/outcome for pua.ai's session card. Daemon ignores them.
    */
   createSession: (opts: {
     environmentId: string
@@ -186,7 +186,7 @@ export type BridgeCoreParams = {
    * isBypassPermissionsModeAvailable) BEFORE calling transitionPermissionMode —
    * that function's internal auto-gate check is a defensive throw, not a
    * graceful guard, and its side-effect order is setAutoModeActive(true) then
-   * throw, which corrupts the 3-way invariant documented in src/CLAUDE.md if
+   * throw, which corrupts the 3-way invariant documented in src/PUA.md if
    * the callback lets the throw escape here.
    */
   onSetPermissionMode?: (
@@ -306,7 +306,7 @@ export async function initBridgeCore(
   // state. The pointer is written unconditionally after session create
   // (crash-recovery for all sessions); perpetual mode just skips the
   // teardown clear so it survives clean exits too. Only reuse 'repl'
-  // pointers — a crashed standalone bridge (`claude remote-control`)
+  // pointers — a crashed standalone bridge (`pua remote-control`)
   // writes source:'standalone' with a different workerType.
   const rawPrior = perpetual ? await readBridgePointer(dir) : null
   const prior = rawPrior?.source === 'repl' ? rawPrior : null
@@ -479,7 +479,7 @@ export async function initBridgeCore(
   // Crash-recovery pointer: written now so a kill -9 at any point after
   // this leaves a recoverable trail. Cleared in teardown (non-perpetual)
   // or left alone (perpetual mode — pointer survives clean exit too).
-  // `claude remote-control --continue` from the same directory will detect
+  // `pua remote-control --continue` from the same directory will detect
   // it and offer to resume.
   await writeBridgePointer(dir, {
     sessionId: currentSessionId,
@@ -527,7 +527,7 @@ export async function initBridgeCore(
   const recentInboundUUIDs = new BoundedUUIDSet(2000)
 
   // 7. Start poll loop for work items — this is what makes the session
-  // "live" on claude.ai. When a user types there, the backend dispatches
+  // "live" on pua.ai. When a user types there, the backend dispatches
   // a work item to our environment. We poll for it, get the ingress token,
   // and connect the ingress WebSocket.
   //
@@ -538,7 +538,7 @@ export async function initBridgeCore(
   // Adapter over either HybridTransport (v1: WS reads + POST writes to
   // Session-Ingress) or SSETransport+CCRClient (v2: SSE reads + POST
   // writes to CCR /worker/*). The v1/v2 choice is made in onWorkReceived:
-  // server-driven via secret.use_code_sessions, with CLAUDE_BRIDGE_USE_CCR_V2
+  // server-driven via secret.use_code_sessions, with PUA_BRIDGE_USE_CCR_V2
   // as an ant-dev override.
   let transport: ReplBridgeTransport | null = null
   // Bumped on every onWorkReceived. Captured in createV2ReplTransport's .then()
@@ -1132,12 +1132,12 @@ export async function initBridgeCore(
       // override for forcing v2 before the server flag is on for your user —
       // requires ccr_v2_compat_enabled server-side or registerWorker 404s.
       //
-      // Kept separate from CLAUDE_CODE_USE_CCR_V2 (the child-SDK transport
+      // Kept separate from PUA_CODE_USE_CCR_V2 (the child-SDK transport
       // selector set by sessionRunner/environment-manager) to avoid the
       // inheritance hazard in spawn mode where the parent's orchestrator
       // var would leak into a v1 child.
       const useCcrV2 =
-        serverUseCcrV2 || isEnvTruthy(process.env.CLAUDE_BRIDGE_USE_CCR_V2)
+        serverUseCcrV2 || isEnvTruthy(process.env.PUA_BRIDGE_USE_CCR_V2)
 
       // Auth is the one place v1 and v2 diverge hard:
       //
@@ -1464,12 +1464,12 @@ export async function initBridgeCore(
               new URL(wsUrl),
               {
                 Authorization: `Bearer ${oauthToken}`,
-                'anthropic-version': '2023-06-01',
+                'pua-version': '2023-06-01',
               },
               workSessionId,
               () => ({
                 Authorization: `Bearer ${getOAuthToken() ?? oauthToken}`,
-                'anthropic-version': '2023-06-01',
+                'pua-version': '2023-06-01',
               }),
               // Cap retries so a persistently-failing session-ingress can't
               // pin the uploader drain loop for the lifetime of the bridge.
@@ -2195,7 +2195,7 @@ async function startWorkPollLoop({
       // BridgeFatalError by handleErrorStatus() — never an axios-shaped
       // error. The poll endpoint's only path param is the env ID; 404
       // unambiguously means env-gone (no-work is a 200 with null body).
-      // The server sends error.type='not_found_error' (standard Anthropic
+      // The server sends error.type='not_found_error' (standard PUA
       // API shape), not a bridge-specific string — but status===404 is
       // the real signal and survives body-shape changes.
       if (

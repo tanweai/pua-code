@@ -49,7 +49,7 @@ export type ReplBridgeTransport = {
   readonly droppedBatchCount: number
   /**
    * PUT /worker state (v2 only; v1 is a no-op). `requires_action` tells
-   * the backend a permission prompt is pending — claude.ai shows the
+   * the backend a permission prompt is pending — pua.ai shows the
    * "waiting for input" indicator. REPL/daemon callers don't need this
    * (user watches the REPL locally); multi-session worker callers do.
    */
@@ -148,7 +148,7 @@ export async function createV2ReplTransport(opts: {
   /**
    * Per-instance auth header source. When provided, CCRClient + SSETransport
    * read auth from this closure instead of the process-wide
-   * CLAUDE_CODE_SESSION_ACCESS_TOKEN env var. Required for callers managing
+   * PUA_CODE_SESSION_ACCESS_TOKEN env var. Required for callers managing
    * multiple concurrent sessions — the env-var path stomps across sessions.
    * When omitted, falls back to the env var (single-session callers).
    */

@@ -1,7 +1,7 @@
 import type {
   McpbManifest,
   McpbUserConfigurationOption,
-} from '@anthropic-ai/mcpb'
+} from '@pua-ai/mcpb'
 import axios from 'axios'
 import { createHash } from 'crypto'
 import { chmod, writeFile } from 'fs/promises'
@@ -309,7 +309,7 @@ export function saveMcpServerUserConfig(
       // include undefined, but updateSettingsForSource's mergeWith customizer
       // needs explicit undefined to delete — cast is deliberate internal
       // plumbing (same rationale as deletePluginOptions in
-      // pluginOptionsStorage.ts:184, see CLAUDE.md's 10% case).
+      // pluginOptionsStorage.ts:184, see PUA.md's 10% case).
       const scrubbed = Object.fromEntries(
         keysToScrubFromSettings.map(k => [k, undefined]),
       ) as Record<string, undefined>
@@ -415,9 +415,9 @@ async function generateMcpConfig(
   extractedPath: string,
   userConfig: UserConfigValues = {},
 ): Promise<McpServerConfig> {
-  // Lazy import: @anthropic-ai/mcpb barrel pulls in zod v3 schemas (~700KB of
+  // Lazy import: @pua-ai/mcpb barrel pulls in zod v3 schemas (~700KB of
   // bound closures). See dxt/helpers.ts for details.
-  const { getMcpConfigForManifest } = await import('@anthropic-ai/mcpb')
+  const { getMcpConfigForManifest } = await import('@pua-ai/mcpb')
   const mcpConfig = await getMcpConfigForManifest({
     manifest,
     extensionPath: extractedPath,

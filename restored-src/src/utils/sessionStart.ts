@@ -31,7 +31,7 @@ export function takeInitialUserMessage(): string | undefined {
   return v
 }
 
-// Note to CLAUDE: do not add ANY "warmup" logic. It is **CRITICAL** that you do not add extra work on startup.
+// Note to PUA: do not add ANY "warmup" logic. It is **CRITICAL** that you do not add extra work on startup.
 export async function processSessionStartHooks(
   source: 'startup' | 'resume' | 'clear' | 'compact',
   {
@@ -101,7 +101,7 @@ export async function processSessionStartHooks(
         errorMessage.includes('EPERM')
       ) {
         userGuidance =
-          'This appears to be a permissions issue. Check file permissions on ~/.claude/plugins/'
+          'This appears to be a permissions issue. Check file permissions on ~/.pua/plugins/'
       } else if (
         errorMessage.includes('Invalid') ||
         errorMessage.includes('parse') ||
@@ -109,7 +109,7 @@ export async function processSessionStartHooks(
         errorMessage.includes('schema')
       ) {
         userGuidance =
-          'This appears to be a configuration issue. Check your plugin settings in .claude/settings.json'
+          'This appears to be a configuration issue. Check your plugin settings in .pua/settings.json'
       } else {
         userGuidance =
           'Please fix the plugin configuration or remove problematic plugins from your settings.'
@@ -122,7 +122,7 @@ export async function processSessionStartHooks(
       )
 
       // Continue execution - plugin hooks won't be available, but project-level hooks
-      // from .claude/settings.json (loaded via captureHooksConfigSnapshot) will still work
+      // from .pua/settings.json (loaded via captureHooksConfigSnapshot) will still work
     }
   }
 

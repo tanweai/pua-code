@@ -14,7 +14,7 @@
  *   render in default fg instead of white/pink. Output structure (line
  *   numbers, markers, backgrounds, word-diff) is identical.
  * - BAT_THEME env support is a stub: highlight.js has no bat theme set, so
- *   getSyntaxTheme always returns the default for the given Claude theme.
+ *   getSyntaxTheme always returns the default for the given PUA theme.
  */
 
 import { diffArrays } from 'diff'
@@ -971,7 +971,7 @@ export function getSyntaxTheme(themeName: string): SyntaxTheme {
   // highlight.js has no bat theme set, so env vars can't select alternate
   // syntect themes. We still report the env var if set, for diagnostics.
   const envTheme =
-    process.env.CLAUDE_CODE_SYNTAX_HIGHLIGHT ?? process.env.BAT_THEME
+    process.env.PUA_CODE_SYNTAX_HIGHLIGHT ?? process.env.BAT_THEME
   void envTheme
   return { theme: defaultSyntaxThemeName(themeName), source: null }
 }

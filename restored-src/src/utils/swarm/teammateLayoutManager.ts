@@ -71,7 +71,7 @@ export async function isInsideTmux(): Promise<boolean> {
  * - Uses ITermBackend for native iTerm2 split panes
  *
  * When running OUTSIDE tmux/iTerm2:
- * - Falls back to TmuxBackend with external claude-swarm session
+ * - Falls back to TmuxBackend with external pua-swarm session
  */
 export async function createTeammatePaneInSwarmView(
   teammateName: string,

@@ -1,11 +1,11 @@
 /**
  * Protocol Handler
  *
- * Entry point for `claude --handle-uri <url>`. When the OS invokes claude
- * with a `claude-cli://` URL, this module:
+ * Entry point for `pua --handle-uri <url>`. When the OS invokes pua
+ * with a `pua-cli://` URL, this module:
  *   1. Parses the URI into a structured action
  *   2. Detects the user's terminal emulator
- *   3. Opens a new terminal window running claude with the appropriate args
+ *   3. Opens a new terminal window running pua with the appropriate args
  *
  * This runs in a headless context (no TTY) because the OS launches the binary
  * directly — there is no terminal attached.
@@ -27,10 +27,10 @@ import { launchInTerminal } from './terminalLauncher.js'
  * Handle an incoming deep link URI.
  *
  * Called from the CLI entry point when `--handle-uri` is passed.
- * This function parses the URI, resolves the claude binary, and
+ * This function parses the URI, resolves the pua binary, and
  * launches it in the user's terminal.
  *
- * @param uri - The raw URI string (e.g., "claude-cli://prompt?q=hello+world")
+ * @param uri - The raw URI string (e.g., "pua-cli://prompt?q=hello+world")
  * @returns exit code (0 = success)
  */
 export async function handleDeepLinkUri(uri: string): Promise<number> {
@@ -50,7 +50,7 @@ export async function handleDeepLinkUri(uri: string): Promise<number> {
 
   // Always the running executable — no PATH lookup. The OS launched us via
   // an absolute path (bundle symlink / .desktop Exec= / registry command)
-  // baked at registration time, and we want the terminal-launched Claude to
+  // baked at registration time, and we want the terminal-launched PUA to
   // be the same binary. process.execPath is that binary.
   const { cwd, resolvedRepo } = await resolveCwd(action)
   // Resolve FETCH_HEAD age here, in the trampoline process, so main.tsx
@@ -75,7 +75,7 @@ export async function handleDeepLinkUri(uri: string): Promise<number> {
 }
 
 /**
- * Handle the case where claude was launched as the app bundle's executable
+ * Handle the case where pua was launched as the app bundle's executable
  * by macOS (via URL scheme). Uses the NAPI module to receive the URL from
  * the Apple Event, then handles it normally.
  *
@@ -105,10 +105,10 @@ export async function handleUrlSchemeLaunch(): Promise<number | null> {
 }
 
 /**
- * Resolve the working directory for the launched Claude instance.
+ * Resolve the working directory for the launched PUA instance.
  * Precedence: explicit cwd > repo lookup (MRU clone) > home.
  * A repo that isn't cloned locally is not an error — fall through to home
- * so a web link referencing a repo the user doesn't have still opens Claude.
+ * so a web link referencing a repo the user doesn't have still opens PUA.
  *
  * Returns the resolved cwd, and the repo slug if (and only if) the MRU
  * lookup hit — so the launched instance can show which clone was selected

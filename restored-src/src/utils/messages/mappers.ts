@@ -1,4 +1,4 @@
-import type { BetaContentBlock } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+import type { BetaContentBlock } from '@pua-ai/sdk/resources/beta/messages/messages.mjs'
 import { randomUUID, type UUID } from 'crypto'
 import { getSessionId } from 'src/bootstrap/state.js'
 import {
@@ -11,7 +11,7 @@ import type {
   SDKMessage,
   SDKRateLimitInfo,
 } from 'src/entrypoints/agentSdkTypes.js'
-import type { ClaudeAILimits } from 'src/services/claudeAiLimits.js'
+import type { PUAAILimits } from 'src/services/puaAiLimits.js'
 import { EXIT_PLAN_MODE_V2_TOOL_NAME } from 'src/tools/ExitPlanModeTool/constants.js'
 import type {
   AssistantMessage,
@@ -189,7 +189,7 @@ export function toSDKMessages(messages: Message[]): SDKMessage[] {
  * because the system/local_command_output subtype is unknown to:
  *   - mobile-apps Android SdkMessageTypes.kt (no local_command_output handler)
  *   - api-go session-ingress convertSystemEvent (only init/compact_boundary)
- * See: https://anthropic.sentry.io/issues/7266299248/ (Android)
+ * See: https://pua.sentry.io/issues/7266299248/ (Android)
  *
  * Strips ANSI (e.g. chalk.dim() in /cost) then unwraps the XML wrapper tags.
  */
@@ -215,11 +215,11 @@ export function localCommandOutputToSDKAssistantMessage(
 }
 
 /**
- * Maps internal ClaudeAILimits to the SDK-facing SDKRateLimitInfo type,
+ * Maps internal PUAAILimits to the SDK-facing SDKRateLimitInfo type,
  * stripping internal-only fields like unifiedRateLimitFallbackAvailable.
  */
 export function toSDKRateLimitInfo(
-  limits: ClaudeAILimits | undefined,
+  limits: PUAAILimits | undefined,
 ): SDKRateLimitInfo | undefined {
   if (!limits) {
     return undefined

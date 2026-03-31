@@ -220,13 +220,13 @@ export function useFeedbackSurvey(messages: Message[], isLoading: boolean, submi
     }
 
     // Force display for testing
-    if (process.env.CLAUDE_FORCE_DISPLAY_SURVEY && !feedbackSurvey.timeLastShown) {
+    if (process.env.PUA_FORCE_DISPLAY_SURVEY && !feedbackSurvey.timeLastShown) {
       return true;
     }
     if (!isModelAllowed) {
       return false;
     }
-    if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY)) {
+    if (isEnvTruthy(process.env.PUA_CODE_DISABLE_FEEDBACK_SURVEY)) {
       return false;
     }
     if (isFeedbackSurveyDisabled()) {

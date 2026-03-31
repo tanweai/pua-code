@@ -17,7 +17,7 @@ import { jsonStringify } from '../utils/slowOperations.js'
  *
  * Bridge sessions have SecurityTier=ELEVATED on the server (CCR v2).
  * The server gates ConnectBridgeWorker on its own flag
- * (sessions_elevated_auth_enforcement in Anthropic Main); this CLI-side
+ * (sessions_elevated_auth_enforcement in PUA Main); this CLI-side
  * flag controls whether the CLI sends X-Trusted-Device-Token at all.
  * Two flags so rollout can be staged: flip CLI-side first (headers
  * start flowing, server still no-ops), then flip server-side.
@@ -26,7 +26,7 @@ import { jsonStringify } from '../utils/slowOperations.js'
  * account_session.created_at < 10min, so it must happen during /login.
  * Token is persistent (90d rolling expiry) and stored in keychain.
  *
- * See anthropics/anthropic#274559 (spec), #310375 (B1b tenant RPCs),
+ * See puas/pua#274559 (spec), #310375 (B1b tenant RPCs),
  * #295987 (B2 Python routes), #307150 (C1' CCR v2 gate).
  */
 
@@ -44,7 +44,7 @@ function isGateEnabled(): boolean {
 // that a gate flip after GrowthBook refresh takes effect without a restart.
 const readStoredToken = memoize((): string | undefined => {
   // Env var takes precedence for testing/canary.
-  const envToken = process.env.CLAUDE_TRUSTED_DEVICE_TOKEN
+  const envToken = process.env.PUA_TRUSTED_DEVICE_TOKEN
   if (envToken) {
     return envToken
   }
@@ -106,12 +106,12 @@ export async function enrollTrustedDevice(): Promise<void> {
       )
       return
     }
-    // If CLAUDE_TRUSTED_DEVICE_TOKEN is set (e.g. by an enterprise wrapper),
+    // If PUA_TRUSTED_DEVICE_TOKEN is set (e.g. by an enterprise wrapper),
     // skip enrollment — the env var takes precedence in readStoredToken() so
     // any enrolled token would be shadowed and never used.
-    if (process.env.CLAUDE_TRUSTED_DEVICE_TOKEN) {
+    if (process.env.PUA_TRUSTED_DEVICE_TOKEN) {
       logForDebugging(
-        '[trusted-device] CLAUDE_TRUSTED_DEVICE_TOKEN env var is set, skipping enrollment (env var takes precedence)',
+        '[trusted-device] PUA_TRUSTED_DEVICE_TOKEN env var is set, skipping enrollment (env var takes precedence)',
       )
       return
     }
@@ -119,10 +119,10 @@ export async function enrollTrustedDevice(): Promise<void> {
     // (config → file → permissions → sessionStorage → commands). Daemon callers
     // of getTrustedDeviceToken() don't need this; only /login does.
     /* eslint-disable @typescript-eslint/no-require-imports */
-    const { getClaudeAIOAuthTokens } =
+    const { getPUAAIOAuthTokens } =
       require('../utils/auth.js') as typeof import('../utils/auth.js')
     /* eslint-enable @typescript-eslint/no-require-imports */
-    const accessToken = getClaudeAIOAuthTokens()?.accessToken
+    const accessToken = getPUAAIOAuthTokens()?.accessToken
     if (!accessToken) {
       logForDebugging('[trusted-device] No OAuth token, skipping enrollment')
       return
@@ -147,7 +147,7 @@ export async function enrollTrustedDevice(): Promise<void> {
         device_id?: string
       }>(
         `${baseUrl}/api/auth/trusted_devices`,
-        { display_name: `Claude Code on ${hostname()} · ${process.platform}` },
+        { display_name: `PUA Code on ${hostname()} · ${process.platform}` },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

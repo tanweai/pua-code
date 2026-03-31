@@ -32,8 +32,8 @@ export function createFallbackStorage(
 
       if (result.success) {
         // Delete secondary when migrating to primary for the first time
-        // This preserves credentials when sharing .claude between host and containers
-        // See: https://github.com/anthropics/claude-code/issues/1414
+        // This preserves credentials when sharing .pua between host and containers
+        // See: https://github.com/puas/pua-code/issues/1414
         if (primaryDataBefore === null) {
           secondary.delete()
         }

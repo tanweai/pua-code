@@ -178,7 +178,7 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
     if (!isPolicyAllowed('allow_product_feedback')) {
       return;
     }
-    if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY)) {
+    if (isEnvTruthy(process.env.PUA_CODE_DISABLE_FEEDBACK_SURVEY)) {
       return;
     }
     if (!lastAssistant || seenAssistantUuids.current.has(lastAssistant.uuid)) {

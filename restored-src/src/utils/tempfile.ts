@@ -11,13 +11,13 @@ import { join } from 'path'
  *   SHA-256 hash of this string (first 16 hex chars). This produces a path
  *   that is stable across process boundaries — any process with the same
  *   content will get the same path. Use this when the path ends up in content
- *   sent to the Anthropic API (e.g., sandbox deny lists in tool descriptions),
+ *   sent to the PUA API (e.g., sandbox deny lists in tool descriptions),
  *   because a random UUID would change on every subprocess spawn and
  *   invalidate the prompt cache prefix.
  * @returns Temp file path
  */
 export function generateTempFilePath(
-  prefix: string = 'claude-prompt',
+  prefix: string = 'pua-prompt',
   extension: string = '.md',
   options?: { contentHash?: string },
 ): string {

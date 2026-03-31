@@ -1,6 +1,6 @@
 /**
  * Agents subcommand handler — prints the list of configured agents.
- * Dynamically imported only when `claude agents` runs.
+ * Dynamically imported only when `pua agents` runs.
  */
 
 import {

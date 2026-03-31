@@ -25,7 +25,7 @@ type SessionEvent = {
 /**
  * Create a session on a bridge environment via POST /v1/sessions.
  *
- * Used by both `claude remote-control` (empty session so the user has somewhere to
+ * Used by both `pua remote-control` (empty session so the user has somewhere to
  * type immediately) and `/remote-control` (session pre-populated with conversation
  * history).
  *
@@ -52,7 +52,7 @@ export async function createBridgeSession({
   getAccessToken?: () => string | undefined
   permissionMode?: string
 }): Promise<string | null> {
-  const { getClaudeAIOAuthTokens } = await import('../utils/auth.js')
+  const { getPUAAIOAuthTokens } = await import('../utils/auth.js')
   const { getOrganizationUUID } = await import('../services/oauth/client.js')
   const { getOauthConfig } = await import('../constants/oauth.js')
   const { getOAuthHeaders } = await import('../utils/teleport/api.js')
@@ -62,7 +62,7 @@ export async function createBridgeSession({
   const { default: axios } = await import('axios')
 
   const accessToken =
-    getAccessToken?.() ?? getClaudeAIOAuthTokens()?.accessToken
+    getAccessToken?.() ?? getPUAAIOAuthTokens()?.accessToken
   if (!accessToken) {
     logForDebugging('[bridge] No access token for session creation')
     return null
@@ -94,7 +94,7 @@ export async function createBridgeSession({
         git_info: {
           type: 'github',
           repo: `${owner}/${name}`,
-          branches: [`claude/${branch || 'task'}`],
+          branches: [`pua/${branch || 'task'}`],
         },
       }
     } else {
@@ -114,7 +114,7 @@ export async function createBridgeSession({
             git_info: {
               type: 'github',
               repo: `${owner}/${name}`,
-              branches: [`claude/${branch || 'task'}`],
+              branches: [`pua/${branch || 'task'}`],
             },
           }
         }
@@ -137,7 +137,7 @@ export async function createBridgeSession({
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': 'ccr-byoc-2025-07-29',
+    'pua-beta': 'ccr-byoc-2025-07-29',
     'x-organization-uuid': orgUUID,
   }
 
@@ -191,14 +191,14 @@ export async function getBridgeSession(
   sessionId: string,
   opts?: { baseUrl?: string; getAccessToken?: () => string | undefined },
 ): Promise<{ environment_id?: string; title?: string } | null> {
-  const { getClaudeAIOAuthTokens } = await import('../utils/auth.js')
+  const { getPUAAIOAuthTokens } = await import('../utils/auth.js')
   const { getOrganizationUUID } = await import('../services/oauth/client.js')
   const { getOauthConfig } = await import('../constants/oauth.js')
   const { getOAuthHeaders } = await import('../utils/teleport/api.js')
   const { default: axios } = await import('axios')
 
   const accessToken =
-    opts?.getAccessToken?.() ?? getClaudeAIOAuthTokens()?.accessToken
+    opts?.getAccessToken?.() ?? getPUAAIOAuthTokens()?.accessToken
   if (!accessToken) {
     logForDebugging('[bridge] No access token for session fetch')
     return null
@@ -212,7 +212,7 @@ export async function getBridgeSession(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': 'ccr-byoc-2025-07-29',
+    'pua-beta': 'ccr-byoc-2025-07-29',
     'x-organization-uuid': orgUUID,
   }
 
@@ -247,7 +247,7 @@ export async function getBridgeSession(
  * Archive a bridge session via POST /v1/sessions/{id}/archive.
  *
  * The CCR server never auto-archives sessions — archival is always an
- * explicit client action. Both `claude remote-control` (standalone bridge) and the
+ * explicit client action. Both `pua remote-control` (standalone bridge) and the
  * always-on `/remote-control` REPL bridge call this during shutdown to archive any
  * sessions that are still alive.
  *
@@ -268,14 +268,14 @@ export async function archiveBridgeSession(
     timeoutMs?: number
   },
 ): Promise<void> {
-  const { getClaudeAIOAuthTokens } = await import('../utils/auth.js')
+  const { getPUAAIOAuthTokens } = await import('../utils/auth.js')
   const { getOrganizationUUID } = await import('../services/oauth/client.js')
   const { getOauthConfig } = await import('../constants/oauth.js')
   const { getOAuthHeaders } = await import('../utils/teleport/api.js')
   const { default: axios } = await import('axios')
 
   const accessToken =
-    opts?.getAccessToken?.() ?? getClaudeAIOAuthTokens()?.accessToken
+    opts?.getAccessToken?.() ?? getPUAAIOAuthTokens()?.accessToken
   if (!accessToken) {
     logForDebugging('[bridge] No access token for session archive')
     return
@@ -289,7 +289,7 @@ export async function archiveBridgeSession(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': 'ccr-byoc-2025-07-29',
+    'pua-beta': 'ccr-byoc-2025-07-29',
     'x-organization-uuid': orgUUID,
   }
 
@@ -320,7 +320,7 @@ export async function archiveBridgeSession(
  * Update the title of a bridge session via PATCH /v1/sessions/{id}.
  *
  * Called when the user renames a session via /rename while a bridge
- * connection is active, so the title stays in sync on claude.ai/code.
+ * connection is active, so the title stays in sync on pua.ai/code.
  *
  * Errors are swallowed — title sync is best-effort.
  */
@@ -329,14 +329,14 @@ export async function updateBridgeSessionTitle(
   title: string,
   opts?: { baseUrl?: string; getAccessToken?: () => string | undefined },
 ): Promise<void> {
-  const { getClaudeAIOAuthTokens } = await import('../utils/auth.js')
+  const { getPUAAIOAuthTokens } = await import('../utils/auth.js')
   const { getOrganizationUUID } = await import('../services/oauth/client.js')
   const { getOauthConfig } = await import('../constants/oauth.js')
   const { getOAuthHeaders } = await import('../utils/teleport/api.js')
   const { default: axios } = await import('axios')
 
   const accessToken =
-    opts?.getAccessToken?.() ?? getClaudeAIOAuthTokens()?.accessToken
+    opts?.getAccessToken?.() ?? getPUAAIOAuthTokens()?.accessToken
   if (!accessToken) {
     logForDebugging('[bridge] No access token for session title update')
     return
@@ -350,7 +350,7 @@ export async function updateBridgeSessionTitle(
 
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': 'ccr-byoc-2025-07-29',
+    'pua-beta': 'ccr-byoc-2025-07-29',
     'x-organization-uuid': orgUUID,
   }
 

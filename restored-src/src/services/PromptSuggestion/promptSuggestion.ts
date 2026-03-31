@@ -23,7 +23,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from '../analytics/index.js'
-import { currentLimits } from '../claudeAiLimits.js'
+import { currentLimits } from '../puaAiLimits.js'
 import { isSpeculationEnabled, startSpeculation } from './speculation.js'
 
 let currentAbortController: AbortController | null = null
@@ -36,7 +36,7 @@ export function getPromptVariant(): PromptVariant {
 
 export function shouldEnablePromptSuggestion(): boolean {
   // Env var overrides everything (for testing)
-  const envOverride = process.env.CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION
+  const envOverride = process.env.PUA_CODE_ENABLE_PROMPT_SUGGESTION
   if (isEnvDefinedFalsy(envOverride)) {
     logEvent('tengu_prompt_suggestion_init', {
       enabled: false,
@@ -255,7 +255,7 @@ export function getParentCacheSuppressReason(
     : null
 }
 
-const SUGGESTION_PROMPT = `[SUGGESTION MODE: Suggest what the user might naturally type next into Claude Code.]
+const SUGGESTION_PROMPT = `[SUGGESTION MODE: Suggest what the user might naturally type next into PUA Code.]
 
 FIRST: Look at the user's recent messages and original request.
 
@@ -266,8 +266,8 @@ THE TEST: Would they think "I was just about to type that"?
 EXAMPLES:
 User asked "fix the bug and run tests", bug is fixed → "run the tests"
 After code written → "try it out"
-Claude offers options → suggest the one the user would likely pick, based on conversation
-Claude asks to continue → "yes" or "go ahead"
+PUA offers options → suggest the one the user would likely pick, based on conversation
+PUA asks to continue → "yes" or "go ahead"
 Task complete, obvious follow-up → "commit this" or "push it"
 After error or misunderstanding → silence (let them assess/correct)
 
@@ -276,7 +276,7 @@ Be specific: "run the tests" beats "continue".
 NEVER SUGGEST:
 - Evaluative ("looks good", "thanks")
 - Questions ("what about...?")
-- Claude-voice ("Let me...", "I'll...", "Here's...")
+- PUA-voice ("Let me...", "I'll...", "Here's...")
 - New ideas they didn't ask about
 - Multiple sentences
 
@@ -437,7 +437,7 @@ export function shouldFilterSuggestion(
         ),
     ],
     [
-      'claude_voice',
+      'pua_voice',
       () =>
         /^(let me|i'll|i've|i'm|i can|i would|i think|i notice|here's|here is|here are|that's|this is|this will|you can|you should|you could|sure,|of course|certainly)/i.test(
           suggestion,

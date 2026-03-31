@@ -2,7 +2,7 @@
  * Utility for persisting large tool results to disk instead of truncating them.
  */
 
-import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ToolResultBlockParam } from '@pua-ai/sdk/resources/index.mjs'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getOriginalCwd, getSessionId } from '../bootstrap/state.js'
@@ -298,7 +298,7 @@ async function maybePersistLargeToolResult(
     return toolResultBlock
   }
 
-  // Skip persistence for image content blocks - they need to be sent as-is to Claude
+  // Skip persistence for image content blocks - they need to be sent as-is to PUA
   if (hasImageBlock(content)) {
     return toolResultBlock
   }

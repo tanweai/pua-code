@@ -14,7 +14,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from '../../services/analytics/index.js'
-import { queryHaiku } from '../../services/api/claude.js'
+import { queryHaiku } from '../../services/api/pua.js'
 import { startsWithApiErrorPrefix } from '../../services/api/errors.js'
 import { memoizeWithLRU } from '../memoize.js'
 import { jsonStringify } from '../slowOperations.js'
@@ -199,7 +199,7 @@ async function getCommandPrefixImpl(
     // Log a warning if the pre-flight check takes too long
     preflightCheckTimeoutId = setTimeout(
       (tn, nonInteractive) => {
-        const message = `[${tn}Tool] Pre-flight check is taking longer than expected. Run with ANTHROPIC_LOG=debug to check for failed or slow API requests.`
+        const message = `[${tn}Tool] Pre-flight check is taking longer than expected. Run with PUA_LOG=debug to check for failed or slow API requests.`
         if (nonInteractive) {
           process.stderr.write(jsonStringify({ level: 'warn', message }) + '\n')
         } else {

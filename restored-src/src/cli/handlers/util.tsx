@@ -16,10 +16,10 @@ import { logEvent } from '../../services/analytics/index.js';
 import { MCPConnectionManager } from '../../services/mcp/MCPConnectionManager.js';
 import { AppStateProvider } from '../../state/AppState.js';
 import { onChangeAppState } from '../../state/onChangeAppState.js';
-import { isAnthropicAuthEnabled } from '../../utils/auth.js';
+import { isPUAAuthEnabled } from '../../utils/auth.js';
 export async function setupTokenHandler(root: Root): Promise<void> {
   logEvent('tengu_setup_token_command', {});
-  const showAuthWarning = !isAnthropicAuthEnabled();
+  const showAuthWarning = !isPUAAuthEnabled();
   const {
     ConsoleOAuthFlow
   } = await import('../../components/ConsoleOAuthFlow.js');
@@ -40,7 +40,7 @@ export async function setupTokenHandler(root: Root): Promise<void> {
               </Box>}
             <ConsoleOAuthFlow onDone={() => {
             void resolve();
-          }} mode="setup-token" startingMessage="This will guide you through long-lived (1-year) auth token setup for your Claude account. Claude subscription required." />
+          }} mode="setup-token" startingMessage="This will guide you through long-lived (1-year) auth token setup for your PUA account. PUA subscription required." />
           </Box>
         </KeybindingSetup>
       </AppStateProvider>);

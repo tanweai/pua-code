@@ -46,7 +46,7 @@ export type ImportTokenError =
  * POSTs a GitHub token to the CCR backend, which validates it against
  * GitHub's /user endpoint and stores it Fernet-encrypted in sync_user_tokens.
  * The stored token satisfies the same read paths as an OAuth token, so
- * clone/push in claude.ai/code works immediately after this succeeds.
+ * clone/push in pua.ai/code works immediately after this succeeds.
  */
 export async function importGithubToken(
   token: RedactedGithubToken,
@@ -64,7 +64,7 @@ export async function importGithubToken(
   const url = `${getOauthConfig().BASE_API_URL}/v1/code/github/import-token`
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': CCR_BYOC_BETA_HEADER,
+    'pua-beta': CCR_BYOC_BETA_HEADER,
     'x-organization-uuid': orgUUID,
   }
 
@@ -142,10 +142,10 @@ export async function createDefaultEnvironment(): Promise<boolean> {
       url,
       {
         name: 'Default',
-        kind: 'anthropic_cloud',
+        kind: 'pua_cloud',
         description: 'Default - trusted network access',
         config: {
-          environment_type: 'anthropic',
+          environment_type: 'pua',
           cwd: '/home/user',
           init_script: null,
           environment: {},
@@ -167,7 +167,7 @@ export async function createDefaultEnvironment(): Promise<boolean> {
   }
 }
 
-/** Returns true when the user has valid Claude OAuth credentials. */
+/** Returns true when the user has valid PUA OAuth credentials. */
 export async function isSignedIn(): Promise<boolean> {
   try {
     await prepareApiRequest()
@@ -178,5 +178,5 @@ export async function isSignedIn(): Promise<boolean> {
 }
 
 export function getCodeWebUrl(): string {
-  return `${getOauthConfig().CLAUDE_AI_ORIGIN}/code`
+  return `${getOauthConfig().PUA_AI_ORIGIN}/code`
 }

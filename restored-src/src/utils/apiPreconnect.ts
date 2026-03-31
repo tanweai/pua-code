@@ -1,5 +1,5 @@
 /**
- * Preconnect to the Anthropic API to overlap TCP+TLS handshake with startup.
+ * Preconnect to the PUA API to overlap TCP+TLS handshake with startup.
  *
  * The TCP+TLS handshake is ~100-200ms that normally blocks inside the first
  * API call. Kicking a fire-and-forget fetch during init lets the handshake
@@ -13,7 +13,7 @@
  * Called from init.ts AFTER applyExtraCACertsFromConfig() + configureGlobalAgents()
  * so settings.json env vars are applied and the TLS cert store is finalized.
  * The early cli.tsx call site was removed — it ran before settings.json loaded,
- * so ANTHROPIC_BASE_URL/proxy/mTLS in settings would be invisible and preconnect
+ * so PUA_BASE_URL/proxy/mTLS in settings would be invisible and preconnect
  * would warm the wrong pool (or worse, lock BoringSSL's cert store before
  * NODE_EXTRA_CA_CERTS was applied).
  *
@@ -28,15 +28,15 @@ import { isEnvTruthy } from './envUtils.js'
 
 let fired = false
 
-export function preconnectAnthropicApi(): void {
+export function preconnectPUAApi(): void {
   if (fired) return
   fired = true
 
   // Skip if using a cloud provider — different endpoint + auth
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy(process.env.PUA_CODE_USE_BEDROCK) ||
+    isEnvTruthy(process.env.PUA_CODE_USE_VERTEX) ||
+    isEnvTruthy(process.env.PUA_CODE_USE_FOUNDRY)
   ) {
     return
   }
@@ -46,18 +46,18 @@ export function preconnectAnthropicApi(): void {
     process.env.https_proxy ||
     process.env.HTTP_PROXY ||
     process.env.http_proxy ||
-    process.env.ANTHROPIC_UNIX_SOCKET ||
-    process.env.CLAUDE_CODE_CLIENT_CERT ||
-    process.env.CLAUDE_CODE_CLIENT_KEY
+    process.env.PUA_UNIX_SOCKET ||
+    process.env.PUA_CODE_CLIENT_CERT ||
+    process.env.PUA_CODE_CLIENT_KEY
   ) {
     return
   }
 
   // Use configured base URL (staging, local, or custom gateway). Covers
-  // ANTHROPIC_BASE_URL env + USE_STAGING_OAUTH + USE_LOCAL_OAUTH in one lookup.
+  // PUA_BASE_URL env + USE_STAGING_OAUTH + USE_LOCAL_OAUTH in one lookup.
   // NODE_EXTRA_CA_CERTS no longer a skip — init.ts applied it before this fires.
   const baseUrl =
-    process.env.ANTHROPIC_BASE_URL || getOauthConfig().BASE_API_URL
+    process.env.PUA_BASE_URL || getOauthConfig().BASE_API_URL
 
   // Fire and forget. HEAD means no response body — the connection is eligible
   // for keep-alive pool reuse immediately after headers arrive. 10s timeout

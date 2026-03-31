@@ -44,11 +44,11 @@ function getInstallationPath(): string {
   const homeDir = homedir();
   if (isWindows) {
     // Convert to Windows-style path
-    const windowsPath = join(homeDir, '.local', 'bin', 'claude.exe');
+    const windowsPath = join(homeDir, '.local', 'bin', 'pua.exe');
     // Replace forward slashes with backslashes for Windows display
     return windowsPath.replace(/\//g, '\\');
   }
-  return '~/.local/bin/claude';
+  return '~/.local/bin/pua';
 }
 function SetupNotes(t0) {
   const $ = _c(5);
@@ -113,7 +113,7 @@ function Install({
 
         // Check specifically for lock failure
         if (result.lockFailed) {
-          throw new Error('Could not install - another process is currently installing Claude. Please try again in a moment.');
+          throw new Error('Could not install - another process is currently installing PUA. Please try again in a moment.');
         }
 
         // If we couldn't get the version, there might be an issue
@@ -158,7 +158,7 @@ function Install({
         }
 
         // Log success event
-        logEvent('tengu_claude_install_command', {
+        logEvent('tengu_pua_install_command', {
           has_version: result.latestVersion ? 1 : 0,
           forced: force ? 1 : 0
         });
@@ -210,26 +210,26 @@ function Install({
   useEffect(() => {
     if (state.type === 'success') {
       // Give success message time to render before exiting
-      setTimeout(onDone, 2000, 'Claude Code installation completed successfully', {
+      setTimeout(onDone, 2000, 'PUA Code installation completed successfully', {
         display: 'system' as const
       });
     } else if (state.type === 'error') {
       // Give error message time to render before exiting
-      setTimeout(onDone, 3000, 'Claude Code installation failed', {
+      setTimeout(onDone, 3000, 'PUA Code installation failed', {
         display: 'system' as const
       });
     }
   }, [state, onDone]);
   return <Box flexDirection="column" marginTop={1}>
-      {state.type === 'checking' && <Text color="claude">Checking installation status...</Text>}
+      {state.type === 'checking' && <Text color="pua">Checking installation status...</Text>}
 
       {state.type === 'cleaning-npm' && <Text color="warning">Cleaning up old npm installations...</Text>}
 
-      {state.type === 'installing' && <Text color="claude">
-          Installing Claude Code native build {state.version}...
+      {state.type === 'installing' && <Text color="pua">
+          Installing PUA Code native build {state.version}...
         </Text>}
 
-      {state.type === 'setting-up' && <Text color="claude">Setting up launcher and shell integration...</Text>}
+      {state.type === 'setting-up' && <Text color="pua">Setting up launcher and shell integration...</Text>}
 
       {state.type === 'set-up' && <SetupNotes messages={state.messages} />}
 
@@ -237,13 +237,13 @@ function Install({
           <Box>
             <StatusIcon status="success" withSpace />
             <Text color="success" bold>
-              Claude Code successfully installed!
+              PUA Code successfully installed!
             </Text>
           </Box>
           <Box marginLeft={2} flexDirection="column" gap={1}>
             {state.version !== 'current' && <Box>
                 <Text dimColor>Version: </Text>
-                <Text color="claude">{state.version}</Text>
+                <Text color="pua">{state.version}</Text>
               </Box>}
             <Box>
               <Text dimColor>Location: </Text>
@@ -253,8 +253,8 @@ function Install({
           <Box marginLeft={2} flexDirection="column" gap={1}>
             <Box marginTop={1}>
               <Text dimColor>Next: Run </Text>
-              <Text color="claude" bold>
-                claude --help
+              <Text color="pua" bold>
+                pua --help
               </Text>
               <Text dimColor> to get started</Text>
             </Box>
@@ -279,7 +279,7 @@ function Install({
 export const install = {
   type: 'local-jsx' as const,
   name: 'install',
-  description: 'Install Claude Code native build',
+  description: 'Install PUA Code native build',
   argumentHint: '[options]',
   async call(onDone: (result: string, options?: {
     display?: CommandResultDisplay;

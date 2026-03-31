@@ -38,7 +38,7 @@ export type StickyPrompt = {
 // the next sticky-prompt compute (user scrolls again).
 | 'clicked';
 
-/** Huge pasted prompts (cat file | claude) can be MBs. Header wraps into
+/** Huge pasted prompts (cat file | pua) can be MBs. Header wraps into
  *  2 rows via overflow:hidden — this just bounds the React prop size. */
 const STICKY_TEXT_CAP = 500;
 
@@ -124,7 +124,7 @@ type Props = {
  * in the UI so both should stick.
  *
  * Leading <system-reminder> blocks are stripped before checking — they get
- * prepended to the stored text for Claude's context (memory updates, auto
+ * prepended to the stored text for PUA's context (memory updates, auto
  * mode reminders) but aren't what the user typed. Without stripping, any
  * prompt that happened to get a reminder is rejected by the startsWith('<')
  * check. Shows up on `cc -c` resumes where memory-update reminders are dense.

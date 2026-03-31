@@ -5,56 +5,56 @@
 import axios from 'axios'
 import { OAUTH_BETA_HEADER } from '../constants/oauth.js'
 import {
-  getAnthropicApiKey,
-  getClaudeAIOAuthTokens,
+  getPUAApiKey,
+  getPUAAIOAuthTokens,
   handleOAuth401Error,
-  isClaudeAISubscriber,
+  isPUAAISubscriber,
 } from './auth.js'
-import { getClaudeCodeUserAgent } from './userAgent.js'
+import { getPUACodeUserAgent } from './userAgent.js'
 import { getWorkload } from './workloadContext.js'
 
-// WARNING: We rely on `claude-cli` in the user agent for log filtering.
+// WARNING: We rely on `pua-cli` in the user agent for log filtering.
 // Please do NOT change this without making sure that logging also gets updated!
 export function getUserAgent(): string {
-  const agentSdkVersion = process.env.CLAUDE_AGENT_SDK_VERSION
-    ? `, agent-sdk/${process.env.CLAUDE_AGENT_SDK_VERSION}`
+  const agentSdkVersion = process.env.PUA_AGENT_SDK_VERSION
+    ? `, agent-sdk/${process.env.PUA_AGENT_SDK_VERSION}`
     : ''
-  // SDK consumers can identify their app/library via CLAUDE_AGENT_SDK_CLIENT_APP
+  // SDK consumers can identify their app/library via PUA_AGENT_SDK_CLIENT_APP
   // e.g., "my-app/1.0.0" or "my-library/2.1"
-  const clientApp = process.env.CLAUDE_AGENT_SDK_CLIENT_APP
-    ? `, client-app/${process.env.CLAUDE_AGENT_SDK_CLIENT_APP}`
+  const clientApp = process.env.PUA_AGENT_SDK_CLIENT_APP
+    ? `, client-app/${process.env.PUA_AGENT_SDK_CLIENT_APP}`
     : ''
   // Turn-/process-scoped workload tag for cron-initiated requests. 1P-only
   // observability — proxies strip HTTP headers; QoS routing uses cc_workload
   // in the billing-header attribution block instead (see constants/system.ts).
-  // getAnthropicClient (client.ts:98) calls this per-request inside withRetry,
+  // getPUAClient (client.ts:98) calls this per-request inside withRetry,
   // so the read picks up the same setWorkload() value as getAttributionHeader.
   const workload = getWorkload()
   const workloadSuffix = workload ? `, workload/${workload}` : ''
-  return `claude-cli/${MACRO.VERSION} (${process.env.USER_TYPE}, ${process.env.CLAUDE_CODE_ENTRYPOINT ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix})`
+  return `pua-cli/${MACRO.VERSION} (${process.env.USER_TYPE}, ${process.env.PUA_CODE_ENTRYPOINT ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix})`
 }
 
 export function getMCPUserAgent(): string {
   const parts: string[] = []
-  if (process.env.CLAUDE_CODE_ENTRYPOINT) {
-    parts.push(process.env.CLAUDE_CODE_ENTRYPOINT)
+  if (process.env.PUA_CODE_ENTRYPOINT) {
+    parts.push(process.env.PUA_CODE_ENTRYPOINT)
   }
-  if (process.env.CLAUDE_AGENT_SDK_VERSION) {
-    parts.push(`agent-sdk/${process.env.CLAUDE_AGENT_SDK_VERSION}`)
+  if (process.env.PUA_AGENT_SDK_VERSION) {
+    parts.push(`agent-sdk/${process.env.PUA_AGENT_SDK_VERSION}`)
   }
-  if (process.env.CLAUDE_AGENT_SDK_CLIENT_APP) {
-    parts.push(`client-app/${process.env.CLAUDE_AGENT_SDK_CLIENT_APP}`)
+  if (process.env.PUA_AGENT_SDK_CLIENT_APP) {
+    parts.push(`client-app/${process.env.PUA_AGENT_SDK_CLIENT_APP}`)
   }
   const suffix = parts.length > 0 ? ` (${parts.join(', ')})` : ''
-  return `claude-code/${MACRO.VERSION}${suffix}`
+  return `pua-code/${MACRO.VERSION}${suffix}`
 }
 
-// User-Agent for WebFetch requests to arbitrary sites. `Claude-User` is
-// Anthropic's publicly documented agent for user-initiated fetches (what site
-// operators match in robots.txt); the claude-code suffix lets them distinguish
-// local CLI traffic from claude.ai server-side fetches.
+// User-Agent for WebFetch requests to arbitrary sites. `PUA-User` is
+// PUA's publicly documented agent for user-initiated fetches (what site
+// operators match in robots.txt); the pua-code suffix lets them distinguish
+// local CLI traffic from pua.ai server-side fetches.
 export function getWebFetchUserAgent(): string {
-  return `Claude-User (${getClaudeCodeUserAgent()}; +https://support.anthropic.com/)`
+  return `PUA-User (${getPUACodeUserAgent()}; +https://support.pua.com/)`
 }
 
 export type AuthHeaders = {
@@ -67,8 +67,8 @@ export type AuthHeaders = {
  * Returns either OAuth headers for Max/Pro users or API key headers for regular users
  */
 export function getAuthHeaders(): AuthHeaders {
-  if (isClaudeAISubscriber()) {
-    const oauthTokens = getClaudeAIOAuthTokens()
+  if (isPUAAISubscriber()) {
+    const oauthTokens = getPUAAIOAuthTokens()
     if (!oauthTokens?.accessToken) {
       return {
         headers: {},
@@ -78,13 +78,13 @@ export function getAuthHeaders(): AuthHeaders {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
+        'pua-beta': OAUTH_BETA_HEADER,
       },
     }
   }
   // TODO: this will fail if the API key is being set to an LLM Gateway key
-  // should we try to query keychain / credentials for a valid Anthropic key?
-  const apiKey = getAnthropicApiKey()
+  // should we try to query keychain / credentials for a valid PUA key?
+  const apiKey = getPUAApiKey()
   if (!apiKey) {
     return {
       headers: {},
@@ -128,7 +128,7 @@ export async function withOAuth401Retry<T>(
         typeof err.response?.data === 'string' &&
         err.response.data.includes('OAuth token has been revoked'))
     if (!isAuthError) throw err
-    const failedAccessToken = getClaudeAIOAuthTokens()?.accessToken
+    const failedAccessToken = getPUAAIOAuthTokens()?.accessToken
     if (!failedAccessToken) throw err
     await handleOAuth401Error(failedAccessToken)
     return await request()

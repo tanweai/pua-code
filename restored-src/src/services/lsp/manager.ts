@@ -15,7 +15,7 @@ type InitializationState = 'not-started' | 'pending' | 'success' | 'failed'
 
 /**
  * Global singleton instance of the LSP server manager.
- * Initialized during Claude Code startup.
+ * Initialized during PUA Code startup.
  */
 let lspManagerInstance: LSPServerManager | undefined
 
@@ -57,7 +57,7 @@ export function _resetLspManagerForTesting(): void {
  * Returns undefined if not yet initialized, initialization failed, or still pending.
  *
  * Callers should check for undefined and handle gracefully, as initialization happens
- * asynchronously during Claude Code startup. Use getInitializationStatus() to
+ * asynchronously during PUA Code startup. Use getInitializationStatus() to
  * distinguish between pending, failed, and not-started states.
  */
 export function getLspServerManager(): LSPServerManager | undefined {
@@ -135,7 +135,7 @@ export async function waitForInitialization(): Promise<void> {
 /**
  * Initialize the LSP server manager singleton.
  *
- * This function is called during Claude Code startup. It synchronously creates
+ * This function is called during PUA Code startup. It synchronously creates
  * the manager instance, then starts async initialization (loading LSP configs)
  * in the background without blocking the startup process.
  *
@@ -212,7 +212,7 @@ export function initializeLspServerManager(): void {
  * successful init. Called from refreshActivePlugins() after plugin caches
  * are cleared, so newly-loaded plugin LSP servers are picked up.
  *
- * Fixes https://github.com/anthropics/claude-code/issues/15521:
+ * Fixes https://github.com/puas/pua-code/issues/15521:
  * loadAllPlugins() is memoized and can be called very early in startup
  * (via getCommands prefetch in setup.ts) before marketplaces are reconciled,
  * caching an empty plugin list. initializeLspServerManager() then reads that
@@ -255,7 +255,7 @@ export function reinitializeLspServerManager(): void {
 /**
  * Shutdown the LSP server manager and clean up resources.
  *
- * This should be called during Claude Code shutdown. Stops all running LSP servers
+ * This should be called during PUA Code shutdown. Stops all running LSP servers
  * and clears internal state. Safe to call when not initialized (no-op).
  *
  * NOTE: Errors during shutdown are logged for monitoring but NOT propagated to the caller.

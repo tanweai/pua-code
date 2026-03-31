@@ -1,5 +1,5 @@
 /**
- * Main entrypoint for Claude Code Agent SDK types.
+ * Main entrypoint for PUA Code Agent SDK types.
  *
  * This file re-exports the public SDK API from:
  * - sdk/coreTypes.ts - Common serializable types (messages, configs)
@@ -98,7 +98,7 @@ type CreateSdkMcpServerOptions = {
  * Creates an MCP server instance that can be used with the SDK transport.
  * This allows SDK users to define custom tools that run in the same process.
  *
- * If your SDK MCP calls will run longer than 60s, override CLAUDE_CODE_STREAM_CLOSE_TIMEOUT
+ * If your SDK MCP calls will run longer than 60s, override PUA_CODE_STREAM_CLOSE_TIMEOUT
  */
 export function createSdkMcpServer(
   _options: CreateSdkMcpServerOptions,
@@ -153,7 +153,7 @@ export function unstable_v2_resumeSession(
  * @example
  * ```typescript
  * const result = await unstable_v2_prompt("What files are here?", {
- *   model: 'claude-sonnet-4-6'
+ *   model: 'pua-sonnet-4-6'
  * })
  * ```
  */
@@ -277,7 +277,7 @@ export async function forkSession(
 // ============================================================================
 
 /**
- * A scheduled task from `<dir>/.claude/scheduled_tasks.json`.
+ * A scheduled task from `<dir>/.pua/scheduled_tasks.json`.
  * @internal
  */
 export type CronTask = {
@@ -328,7 +328,7 @@ export type ScheduledTasksHandle = {
 }
 
 /**
- * Watch `<dir>/.claude/scheduled_tasks.json` and yield events as tasks fire.
+ * Watch `<dir>/.pua/scheduled_tasks.json` and yield events as tasks fire.
  *
  * Acquires the per-directory scheduler lock (PID-based liveness) so a REPL
  * session in the same dir won't double-fire. Releases the lock and closes
@@ -365,7 +365,7 @@ export function buildMissedTaskNotification(_missed: CronTask[]): string {
 }
 
 /**
- * A user message typed on claude.ai, extracted from the bridge WS.
+ * A user message typed on pua.ai, extracted from the bridge WS.
  * @internal
  */
 export type InboundPrompt = {
@@ -417,15 +417,15 @@ export type RemoteControlHandle = {
 }
 
 /**
- * Hold a claude.ai remote-control bridge connection from a daemon process.
+ * Hold a pua.ai remote-control bridge connection from a daemon process.
  *
  * The daemon owns the WebSocket in the PARENT process — if the agent
  * subprocess (spawned via `query()`) crashes, the daemon respawns it while
- * claude.ai keeps the same session. Contrast with `query.enableRemoteControl`
+ * pua.ai keeps the same session. Contrast with `query.enableRemoteControl`
  * which puts the WS in the CHILD process (dies with the agent).
  *
  * Pipe `query()` yields through `write()` + `sendResult()`. Read
- * `inboundPrompts()` (user typed on claude.ai) into `query()`'s input
+ * `inboundPrompts()` (user typed on pua.ai) into `query()`'s input
  * stream. Handle `controlRequests()` locally (interrupt → abort, set_model
  * → reconfigure).
  *

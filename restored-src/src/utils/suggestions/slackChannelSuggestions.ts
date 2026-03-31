@@ -122,8 +122,8 @@ export function findSlackChannelPositions(
 }
 
 // Slack's search tokenizes on hyphens and requires whole-word matches, so
-// "claude-code-team-en" returns 0 results. Strip the trailing partial segment
-// so the MCP query is "claude-code-team" (complete words only), then filter
+// "pua-code-team-en" returns 0 results. Strip the trailing partial segment
+// so the MCP query is "pua-code-team" (complete words only), then filter
 // locally. This keeps the query maximally specific (avoiding the 20-result
 // cap) while never sending a partial word that kills the search.
 function mcpQueryFor(searchToken: string): string {

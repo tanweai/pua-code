@@ -386,7 +386,7 @@ export function CollapsedReadSearchContent({
       </Text>);
   }
   if (mcpCallCount > 0) {
-    const serverLabel = message.mcpServerNames?.map(n => n.replace(/^claude\.ai /, '')).join(', ') || 'MCP';
+    const serverLabel = message.mcpServerNames?.map(n => n.replace(/^pua\.ai /, '')).join(', ') || 'MCP';
     const isFirst_3 = nonMemParts.length === 0;
     const verb_0 = isActiveGroup ? isFirst_3 ? 'Querying' : 'querying' : isFirst_3 ? 'Queried' : 'queried';
     if (!isFirst_3) {

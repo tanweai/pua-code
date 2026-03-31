@@ -1,4 +1,4 @@
-# claude-code-sourcemap
+# pua-code-sourcemap
 
 [![linux.do](https://img.shields.io/badge/linux.do-huo0-blue?logo=linux&logoColor=white)](https://linux.do)
 
@@ -12,11 +12,11 @@
 
 ## 概述
 
-本仓库通过 npm 发布包（`@anthropic-ai/claude-code`）内附带的 source map（`cli.js.map`）还原的 TypeScript 源码，版本为 `2.1.88`。
+本仓库通过 npm 发布包（`@pua-ai/pua-code`）内附带的 source map（`cli.js.map`）还原的 TypeScript 源码，版本为 `2.1.88`。
 
 ## 来源
 
-- npm 包：[@anthropic-ai/claude-code](https://www.npmjs.com/package/@anthropic-ai/claude-code)
+- npm 包：[@pua-ai/pua-code](https://www.npmjs.com/package/@pua-ai/pua-code)
 - 还原版本：`2.1.88`
 - 还原文件数：**4756 个**（含 1884 个 `.ts`/`.tsx` 源文件）
 - 还原方式：提取 `cli.js.map` 中的 `sourcesContent` 字段
@@ -43,6 +43,6 @@ restored-src/src/
 
 ## 声明
 
-- 源码版权归 [Anthropic](https://www.anthropic.com) 所有
+- 源码版权归 [PUA](https://www.pua.com) 所有
 - 本仓库仅用于技术研究与学习，请勿用于商业用途
 - 如有侵权，请联系删除

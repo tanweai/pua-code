@@ -42,15 +42,15 @@ const NO_PROXY_LIST = [
   '10.0.0.0/8',
   '172.16.0.0/12',
   '192.168.0.0/16',
-  // Anthropic API: no upstream route will ever match, and the MITM breaks
+  // PUA API: no upstream route will ever match, and the MITM breaks
   // non-Bun runtimes (Python httpx/certifi doesn't trust the forged CA).
   // Three forms because NO_PROXY parsing differs across runtimes:
-  //   *.anthropic.com  — Bun, curl, Go (glob match)
-  //   .anthropic.com   — Python urllib/httpx (suffix match, strips leading dot)
-  //   anthropic.com    — apex domain fallback
-  'anthropic.com',
-  '.anthropic.com',
-  '*.anthropic.com',
+  //   *.pua.com  — Bun, curl, Go (glob match)
+  //   .pua.com   — Python urllib/httpx (suffix match, strips leading dot)
+  //   pua.com    — apex domain fallback
+  'pua.com',
+  '.pua.com',
+  '*.pua.com',
   'github.com',
   'api.github.com',
   '*.github.com',
@@ -82,7 +82,7 @@ export async function initUpstreamProxy(opts?: {
   caBundlePath?: string
   ccrBaseUrl?: string
 }): Promise<UpstreamProxyState> {
-  if (!isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+  if (!isEnvTruthy(process.env.PUA_CODE_REMOTE)) {
     return state
   }
   // CCR evaluates ccr_upstream_proxy_enabled server-side (where GrowthBook is
@@ -93,10 +93,10 @@ export async function initUpstreamProxy(opts?: {
     return state
   }
 
-  const sessionId = process.env.CLAUDE_CODE_REMOTE_SESSION_ID
+  const sessionId = process.env.PUA_CODE_REMOTE_SESSION_ID
   if (!sessionId) {
     logForDebugging(
-      '[upstreamproxy] CLAUDE_CODE_REMOTE_SESSION_ID unset; proxy disabled',
+      '[upstreamproxy] PUA_CODE_REMOTE_SESSION_ID unset; proxy disabled',
       { level: 'warn' },
     )
     return state
@@ -111,14 +111,14 @@ export async function initUpstreamProxy(opts?: {
 
   setNonDumpable()
 
-  // CCR injects ANTHROPIC_BASE_URL via StartupContext (sessionExecutor.ts /
+  // CCR injects PUA_BASE_URL via StartupContext (sessionExecutor.ts /
   // sessionHandler.ts). getOauthConfig() is wrong here: it keys off
   // USER_TYPE + USE_{LOCAL,STAGING}_OAUTH, none of which the container sets,
   // so it always returned the prod URL and the CA fetch 404'd.
   const baseUrl =
     opts?.ccrBaseUrl ??
-    process.env.ANTHROPIC_BASE_URL ??
-    'https://api.anthropic.com'
+    process.env.PUA_BASE_URL ??
+    'https://api.pua.com'
   const caBundlePath =
     opts?.caBundlePath ?? join(homedir(), '.ccr', 'ca-bundle.crt')
 

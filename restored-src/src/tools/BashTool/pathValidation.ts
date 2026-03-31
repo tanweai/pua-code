@@ -116,12 +116,12 @@ function checkDangerousRemovalPaths(
  * `!arg.startsWith('-')` filtering drops these, causing path validation to be
  * silently skipped for attack payloads like:
  *
- *   rm -- -/../.claude/settings.local.json
+ *   rm -- -/../.pua/settings.local.json
  *
- * Here `-/../.claude/settings.local.json` starts with `-` so the naive filter
+ * Here `-/../.pua/settings.local.json` starts with `-` so the naive filter
  * drops it, validation sees zero paths, returns passthrough, and the file is
  * deleted without a prompt. With `--` handling, the path IS extracted and
- * validated (blocked by isClaudeConfigFilePath / pathInAllowedWorkingPath).
+ * validated (blocked by isPUAConfigFilePath / pathInAllowedWorkingPath).
  */
 function filterOutFlags(args: string[]): string[] {
   const result: string[] = []
@@ -619,7 +619,7 @@ function validateCommandPaths(
   if (validator && !validator(args)) {
     return {
       behavior: 'ask',
-      message: `${command} with flags requires manual approval to ensure path safety. For security, Claude Code cannot automatically validate ${command} commands that use flags, as some flags like --target-directory=PATH can bypass path validation.`,
+      message: `${command} with flags requires manual approval to ensure path safety. For security, PUA Code cannot automatically validate ${command} commands that use flags, as some flags like --target-directory=PATH can bypass path validation.`,
       decisionReason: {
         type: 'other',
         reason: `${command} command with flags requires manual approval`,
@@ -629,13 +629,13 @@ function validateCommandPaths(
 
   // SECURITY: Block write operations in compound commands containing 'cd'
   // This prevents bypassing path safety checks via directory changes before operations.
-  // Example attack: cd .claude/ && mv test.txt settings.json
-  // This would bypass the check for .claude/settings.json because paths are resolved
+  // Example attack: cd .pua/ && mv test.txt settings.json
+  // This would bypass the check for .pua/settings.json because paths are resolved
   // relative to the original CWD, not accounting for the cd's effect.
   //
   // ALTERNATIVE APPROACH: Instead of blocking all writes with cd, we could track the
-  // effective CWD through the command chain (e.g., after "cd .claude/", subsequent
-  // commands would be validated with CWD=".claude/"). This would be more permissive
+  // effective CWD through the command chain (e.g., after "cd .pua/", subsequent
+  // commands would be validated with CWD=".pua/"). This would be more permissive
   // but requires careful handling of:
   // - Relative paths (cd ../foo)
   // - Special cd targets (cd ~, cd -, cd with no args)
@@ -645,7 +645,7 @@ function validateCommandPaths(
   if (compoundCommandHasCd && operationType !== 'read') {
     return {
       behavior: 'ask',
-      message: `Commands that change directories and perform write operations require explicit approval to ensure paths are evaluated correctly. For security, Claude Code cannot automatically determine the final working directory when 'cd' is used in compound commands.`,
+      message: `Commands that change directories and perform write operations require explicit approval to ensure paths are evaluated correctly. For security, PUA Code cannot automatically determine the final working directory when 'cd' is used in compound commands.`,
       decisionReason: {
         type: 'other',
         reason:
@@ -674,7 +674,7 @@ function validateCommandPaths(
         decisionReason?.type === 'other' ||
         decisionReason?.type === 'safetyCheck'
           ? decisionReason.reason
-          : `${command} in '${resolvedPath}' was blocked. For security, Claude Code may only ${ACTION_VERBS[command]} the allowed working directories for this session: ${dirListStr}.`
+          : `${command} in '${resolvedPath}' was blocked. For security, PUA Code may only ${ACTION_VERBS[command]} the allowed working directories for this session: ${dirListStr}.`
 
       if (decisionReason?.type === 'rule') {
         return {
@@ -929,13 +929,13 @@ function validateOutputRedirections(
 ): PermissionResult {
   // SECURITY: Block output redirections in compound commands containing 'cd'
   // This prevents bypassing path safety checks via directory changes before redirections.
-  // Example attack: cd .claude/ && echo "malicious" > settings.json
+  // Example attack: cd .pua/ && echo "malicious" > settings.json
   // The redirection target would be validated relative to the original CWD, but the
   // actual write happens in the changed directory after 'cd' executes.
   if (compoundCommandHasCd && redirections.length > 0) {
     return {
       behavior: 'ask',
-      message: `Commands that change directories and write via output redirection require explicit approval to ensure paths are evaluated correctly. For security, Claude Code cannot automatically determine the final working directory when 'cd' is used in compound commands.`,
+      message: `Commands that change directories and write via output redirection require explicit approval to ensure paths are evaluated correctly. For security, PUA Code cannot automatically determine the final working directory when 'cd' is used in compound commands.`,
       decisionReason: {
         type: 'other',
         reason:
@@ -969,7 +969,7 @@ function validateOutputRedirections(
           ? decisionReason.reason
           : decisionReason?.type === 'rule'
             ? `Output redirection to '${resolvedPath}' was blocked by a deny rule.`
-            : `Output redirection to '${resolvedPath}' was blocked. For security, Claude Code may only write to files in the allowed working directories for this session: ${dirListStr}.`
+            : `Output redirection to '${resolvedPath}' was blocked. For security, PUA Code may only write to files in the allowed working directories for this session: ${dirListStr}.`
 
       // If denied by a deny rule, return 'deny' behavior
       if (decisionReason?.type === 'rule') {

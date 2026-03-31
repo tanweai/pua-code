@@ -258,11 +258,11 @@ export async function requestMicrophonePermission(): Promise<boolean> {
 
 export async function checkRecordingAvailability(): Promise<RecordingAvailability> {
   // Remote environments have no local microphone
-  if (isRunningOnHomespace() || isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+  if (isRunningOnHomespace() || isEnvTruthy(process.env.PUA_CODE_REMOTE)) {
     return {
       available: false,
       reason:
-        'Voice mode requires microphone access, but no audio device is available in this environment.\n\nTo use voice mode, run Claude Code locally instead.',
+        'Voice mode requires microphone access, but no audio device is available in this environment.\n\nTo use voice mode, run PUA Code locally instead.',
     }
   }
 
@@ -282,7 +282,7 @@ export async function checkRecordingAvailability(): Promise<RecordingAvailabilit
   }
 
   const wslNoAudioReason =
-    'Voice mode could not access an audio device in WSL.\n\nWSL2 with WSLg (Windows 11) provides audio via PulseAudio — if you are on Windows 10 or WSL1, run Claude Code in native Windows instead.'
+    'Voice mode could not access an audio device in WSL.\n\nWSL2 with WSLg (Windows 11) provides audio via PulseAudio — if you are on Windows 10 or WSL1, run PUA Code in native Windows instead.'
 
   // On Linux (including WSL), probe arecord. hasCommand() is insufficient:
   // the binary can exist while the device open() fails (WSL1, Win10-WSL2,

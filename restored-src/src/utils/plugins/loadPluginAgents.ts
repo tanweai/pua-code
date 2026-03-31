@@ -107,7 +107,7 @@ async function loadAgentFromFile(
     const backgroundRaw = frontmatter.background
     const background =
       backgroundRaw === 'true' || backgroundRaw === true ? true : undefined
-    // Substitute ${CLAUDE_PLUGIN_ROOT} so agents can reference bundled files,
+    // Substitute ${PUA_PLUGIN_ROOT} so agents can reference bundled files,
     // and ${user_config.X} (non-sensitive only) so they can embed configured
     // usernames, endpoints, etc. Sensitive refs resolve to a placeholder.
     let systemPrompt = substitutePluginVariables(markdownContent.trim(), {
@@ -153,7 +153,7 @@ async function loadAgentFromFile(
     // permissionMode, hooks, and mcpServers are intentionally NOT parsed for
     // plugin agents. Plugins are third-party marketplace code; these fields
     // escalate what the agent can do beyond what the user approved at install
-    // time. For this level of control, define the agent in .claude/agents/
+    // time. For this level of control, define the agent in .pua/agents/
     // where the user explicitly wrote the frontmatter. (Note: plugins can
     // still ship hooks and MCP servers at the manifest level — that's the
     // install-time trust boundary. Per-agent declarations would let a single
@@ -161,7 +161,7 @@ async function loadAgentFromFile(
     for (const field of ['permissionMode', 'hooks', 'mcpServers'] as const) {
       if (frontmatter[field] !== undefined) {
         logForDebugging(
-          `Plugin agent file ${filePath} sets ${field}, which is ignored for plugin agents. Use .claude/agents/ for this level of control.`,
+          `Plugin agent file ${filePath} sets ${field}, which is ignored for plugin agents. Use .pua/agents/ for this level of control.`,
           { level: 'warn' },
         )
       }

@@ -6,7 +6,7 @@ import {
 import { invalidateOverageCreditGrantCache } from '../../services/api/overageCreditGrant.js'
 import { type ExtraUsage, fetchUtilization } from '../../services/api/usage.js'
 import { getSubscriptionType } from '../../utils/auth.js'
-import { hasClaudeAiBillingAccess } from '../../utils/billing.js'
+import { hasPUAAiBillingAccess } from '../../utils/billing.js'
 import { openBrowser } from '../../utils/browser.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logError } from '../../utils/log.js'
@@ -27,10 +27,10 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
   const subscriptionType = getSubscriptionType()
   const isTeamOrEnterprise =
     subscriptionType === 'team' || subscriptionType === 'enterprise'
-  const hasBillingAccess = hasClaudeAiBillingAccess()
+  const hasBillingAccess = hasPUAAiBillingAccess()
 
   if (!hasBillingAccess && isTeamOrEnterprise) {
-    // Mirror apps/claude-ai useHasUnlimitedOverage(): if overage is enabled
+    // Mirror apps/pua-ai useHasUnlimitedOverage(): if overage is enabled
     // with no monthly cap, there is nothing to request. On fetch error, fall
     // through and let the user ask (matching web's "err toward show" behavior).
     let extraUsage: ExtraUsage | null | undefined
@@ -102,8 +102,8 @@ export async function runExtraUsage(): Promise<ExtraUsageResult> {
   }
 
   const url = isTeamOrEnterprise
-    ? 'https://claude.ai/admin-settings/usage'
-    : 'https://claude.ai/settings/usage'
+    ? 'https://pua.ai/admin-settings/usage'
+    : 'https://pua.ai/settings/usage'
 
   try {
     const opened = await openBrowser(url)

@@ -4,7 +4,7 @@ import { dirname, join } from 'path'
 import { coerce } from 'semver'
 import { getIsNonInteractiveSession } from '../bootstrap/state.js'
 import { getGlobalConfig, saveGlobalConfig } from './config.js'
-import { getClaudeConfigHomeDir } from './envUtils.js'
+import { getPUAConfigHomeDir } from './envUtils.js'
 import { toError } from './errors.js'
 import { logError } from './log.js'
 import { isEssentialTrafficOnly } from './privacyLevel.js'
@@ -23,19 +23,19 @@ const MAX_RELEASE_NOTES_SHOWN = 5
  * The flow is:
  * 1. User updates to a new version
  * 2. We fetch the changelog in the background and store it in config
- * 3. Next time the user starts Claude, the cached changelog is available immediately
+ * 3. Next time the user starts PUA, the cached changelog is available immediately
  */
 export const CHANGELOG_URL =
-  'https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md'
+  'https://github.com/puas/pua-code/blob/main/CHANGELOG.md'
 const RAW_CHANGELOG_URL =
-  'https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/CHANGELOG.md'
+  'https://raw.githubusercontent.com/puas/pua-code/refs/heads/main/CHANGELOG.md'
 
 /**
  * Get the path for the cached changelog file.
- * The changelog is stored at ~/.claude/cache/changelog.md
+ * The changelog is stored at ~/.pua/cache/changelog.md
  */
 function getChangelogCachePath(): string {
-  return join(getClaudeConfigHomeDir(), 'cache', 'changelog.md')
+  return join(getPUAConfigHomeDir(), 'cache', 'changelog.md')
 }
 
 // In-memory cache populated by async reads. Sync callers (React render, sync

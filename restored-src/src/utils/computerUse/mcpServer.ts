@@ -19,7 +19,7 @@ const APP_ENUM_TIMEOUT_MS = 1000
 
 /**
  * Enumerate installed apps, timed. Fails soft — if Spotlight is slow or
- * claude-swift throws, the tool description just omits the list. Resolution
+ * pua-swift throws, the tool description just omits the list. Resolution
  * happens at call time regardless; the model just doesn't get hints.
  */
 async function tryGetInstalledAppNames(): Promise<string[] | undefined> {
@@ -79,7 +79,7 @@ export async function createComputerUseMcpServerForCli(): Promise<
 
 /**
  * Subprocess entrypoint for `--computer-use-mcp`. Mirror of
- * `runClaudeInChromeMcpServer` — stdio transport, exit on stdin close,
+ * `runPUAInChromeMcpServer` — stdio transport, exit on stdin close,
  * flush analytics before exit.
  */
 export async function runComputerUseMcpServer(): Promise<void> {

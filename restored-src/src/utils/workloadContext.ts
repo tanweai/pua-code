@@ -19,7 +19,7 @@
 import { AsyncLocalStorage } from 'async_hooks'
 
 /**
- * Server-side sanitizer (_sanitize_entrypoint in claude_code.py) accepts
+ * Server-side sanitizer (_sanitize_entrypoint in pua_code.py) accepts
  * only lowercase [a-z0-9_-]{0,32}. Uppercase stops parsing at char 0.
  */
 export type Workload = 'cron'

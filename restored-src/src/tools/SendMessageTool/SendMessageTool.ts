@@ -198,7 +198,7 @@ async function handleBroadcast(
 
   if (!teamName) {
     throw new Error(
-      'Not in a team context. Create a team with Teammate spawnTeam first, or set CLAUDE_CODE_TEAM_NAME.',
+      'Not in a team context. Create a team with Teammate spawnTeam first, or set PUA_CODE_TEAM_NAME.',
     )
   }
 
@@ -211,7 +211,7 @@ async function handleBroadcast(
     getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
   if (!senderName) {
     throw new Error(
-      'Cannot broadcast: sender name is required. Set CLAUDE_CODE_AGENT_NAME.',
+      'Cannot broadcast: sender name is required. Set PUA_CODE_AGENT_NAME.',
     )
   }
 
@@ -586,7 +586,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
       if (feature('UDS_INBOX') && parseAddress(input.to).scheme === 'bridge') {
         return {
           behavior: 'ask' as const,
-          message: `Send a message to Remote Control session ${input.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via Anthropic's servers.`,
+          message: `Send a message to Remote Control session ${input.to}? It arrives as a user prompt on the receiving PUA (possibly another machine) via PUA's servers.`,
           // safetyCheck (not mode) — permissions.ts guards this before both
           // bypassPermissions (step 1g) and auto-mode's allowlist/classifier.
           // Cross-machine prompt injection must stay bypass-immune.
@@ -640,7 +640,7 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             errorCode: 9,
           }
         }
-        // postInterClaudeMessage derives from= via getReplBridgeHandle() —
+        // postInterPUAMessage derives from= via getReplBridgeHandle() —
         // check handle directly for the init-timing window. Also check
         // isReplBridgeActive() to reject outbound-only (CCR mirror) mode
         // where the bridge is write-only and peer messaging is unsupported.
@@ -755,10 +755,10 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             }
           }
           /* eslint-disable @typescript-eslint/no-require-imports */
-          const { postInterClaudeMessage } =
+          const { postInterPUAMessage } =
             require('../../bridge/peerSessions.js') as typeof import('../../bridge/peerSessions.js')
           /* eslint-enable @typescript-eslint/no-require-imports */
-          const result = await postInterClaudeMessage(
+          const result = await postInterPUAMessage(
             addr.target,
             input.message,
           )

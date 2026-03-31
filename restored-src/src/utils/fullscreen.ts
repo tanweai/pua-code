@@ -105,22 +105,22 @@ export function _resetTmuxControlModeProbeForTesting(): void {
 }
 
 /**
- * Runtime env-var check only. Ants default to on (CLAUDE_CODE_NO_FLICKER=0
- * to opt out); external users default to off (CLAUDE_CODE_NO_FLICKER=1 to
+ * Runtime env-var check only. Ants default to on (PUA_CODE_NO_FLICKER=0
+ * to opt out); external users default to off (PUA_CODE_NO_FLICKER=1 to
  * opt in).
  */
 export function isFullscreenEnvEnabled(): boolean {
   // Explicit user opt-out always wins.
-  if (isEnvDefinedFalsy(process.env.CLAUDE_CODE_NO_FLICKER)) return false
+  if (isEnvDefinedFalsy(process.env.PUA_CODE_NO_FLICKER)) return false
   // Explicit opt-in overrides auto-detection (escape hatch).
-  if (isEnvTruthy(process.env.CLAUDE_CODE_NO_FLICKER)) return true
+  if (isEnvTruthy(process.env.PUA_CODE_NO_FLICKER)) return true
   // Auto-disable under tmux -CC: alt-screen + mouse tracking corrupts
   // terminal state on double-click and mouse wheel is dead.
   if (isTmuxControlMode()) {
     if (!loggedTmuxCcDisable) {
       loggedTmuxCcDisable = true
       logForDebugging(
-        'fullscreen disabled: tmux -CC (iTerm2 integration mode) detected · set CLAUDE_CODE_NO_FLICKER=1 to override',
+        'fullscreen disabled: tmux -CC (iTerm2 integration mode) detected · set PUA_CODE_NO_FLICKER=1 to override',
       )
     }
     return false
@@ -130,26 +130,26 @@ export function isFullscreenEnvEnabled(): boolean {
 
 /**
  * Whether fullscreen mode should enable SGR mouse tracking (DEC 1000/1002/1006).
- * Set CLAUDE_CODE_DISABLE_MOUSE=1 to keep alt-screen + virtualized scroll
+ * Set PUA_CODE_DISABLE_MOUSE=1 to keep alt-screen + virtualized scroll
  * (keyboard PgUp/PgDn/Ctrl+Home/End still work) but skip mouse capture,
  * so tmux/kitty/terminal-native copy-on-select keeps working.
  *
- * Compare with CLAUDE_CODE_NO_FLICKER=0 which is all-or-nothing — it also
+ * Compare with PUA_CODE_NO_FLICKER=0 which is all-or-nothing — it also
  * disables alt-screen and virtualized scrollback.
  */
 export function isMouseTrackingEnabled(): boolean {
-  return !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_MOUSE)
+  return !isEnvTruthy(process.env.PUA_CODE_DISABLE_MOUSE)
 }
 
 /**
  * Whether mouse click handling is disabled (clicks/drags ignored, wheel still
- * works). Set CLAUDE_CODE_DISABLE_MOUSE_CLICKS=1 to prevent accidental clicks
+ * works). Set PUA_CODE_DISABLE_MOUSE_CLICKS=1 to prevent accidental clicks
  * from triggering cursor positioning, text selection, or message expansion.
  *
- * Fullscreen-specific — only reachable when CLAUDE_CODE_NO_FLICKER is active.
+ * Fullscreen-specific — only reachable when PUA_CODE_NO_FLICKER is active.
  */
 export function isMouseClicksDisabled(): boolean {
-  return isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_MOUSE_CLICKS)
+  return isEnvTruthy(process.env.PUA_CODE_DISABLE_MOUSE_CLICKS)
 }
 
 /**

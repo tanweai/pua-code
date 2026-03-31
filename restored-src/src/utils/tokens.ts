@@ -1,4 +1,4 @@
-import type { BetaUsage as Usage } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+import type { BetaUsage as Usage } from '@pua-ai/sdk/resources/beta/messages/messages.mjs'
 import { roughTokenCountEstimationForMessages } from '../services/tokenEstimation.js'
 import type { AssistantMessage, Message } from '../types/message.js'
 import { SYNTHETIC_MESSAGES, SYNTHETIC_MODEL } from './messages.js'
@@ -117,7 +117,7 @@ export function finalContextTokensFromLastResponse(
  *
  * WARNING: Do NOT use this for threshold comparisons (autocompact, session memory).
  * Use tokenCountWithEstimation() instead, which measures full context size.
- * This function is only useful for measuring how many tokens Claude generated
+ * This function is only useful for measuring how many tokens PUA generated
  * in a single response, not how full the context window is.
  */
 export function messageTokenCountFromLastAPIResponse(

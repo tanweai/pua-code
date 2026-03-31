@@ -1,15 +1,15 @@
 import { feature } from 'bun:bundle'
 import memoize from 'lodash-es/memoize.js'
 import {
-  getAdditionalDirectoriesForClaudeMd,
-  setCachedClaudeMdContent,
+  getAdditionalDirectoriesForPUAMd,
+  setCachedPUAMdContent,
 } from './bootstrap/state.js'
 import { getLocalISODate } from './constants/common.js'
 import {
   filterInjectedMemoryFiles,
-  getClaudeMds,
+  getPUAMds,
   getMemoryFiles,
-} from './utils/claudemd.js'
+} from './utils/puamd.js'
 import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
 import { isBareMode, isEnvTruthy } from './utils/envUtils.js'
 import { execFileNoThrow } from './utils/execFileNoThrow.js'
@@ -122,7 +122,7 @@ export const getSystemContext = memoize(
 
     // Skip git status in CCR (unnecessary overhead on resume) or when git instructions are disabled
     const gitStatus =
-      isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) ||
+      isEnvTruthy(process.env.PUA_CODE_REMOTE) ||
       !shouldIncludeGitInstructions()
         ? null
         : await getGitStatus()
@@ -159,30 +159,30 @@ export const getUserContext = memoize(
     const startTime = Date.now()
     logForDiagnosticsNoPII('info', 'user_context_started')
 
-    // CLAUDE_CODE_DISABLE_CLAUDE_MDS: hard off, always.
+    // PUA_CODE_DISABLE_PUA_MDS: hard off, always.
     // --bare: skip auto-discovery (cwd walk), BUT honor explicit --add-dir.
     // --bare means "skip what I didn't ask for", not "ignore what I asked for".
-    const shouldDisableClaudeMd =
-      isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_CLAUDE_MDS) ||
-      (isBareMode() && getAdditionalDirectoriesForClaudeMd().length === 0)
+    const shouldDisablePUAMd =
+      isEnvTruthy(process.env.PUA_CODE_DISABLE_PUA_MDS) ||
+      (isBareMode() && getAdditionalDirectoriesForPUAMd().length === 0)
     // Await the async I/O (readFile/readdir directory walk) so the event
     // loop yields naturally at the first fs.readFile.
-    const claudeMd = shouldDisableClaudeMd
+    const puaMd = shouldDisablePUAMd
       ? null
-      : getClaudeMds(filterInjectedMemoryFiles(await getMemoryFiles()))
+      : getPUAMds(filterInjectedMemoryFiles(await getMemoryFiles()))
     // Cache for the auto-mode classifier (yoloClassifier.ts reads this
-    // instead of importing claudemd.ts directly, which would create a
+    // instead of importing puamd.ts directly, which would create a
     // cycle through permissions/filesystem → permissions → yoloClassifier).
-    setCachedClaudeMdContent(claudeMd || null)
+    setCachedPUAMdContent(puaMd || null)
 
     logForDiagnosticsNoPII('info', 'user_context_completed', {
       duration_ms: Date.now() - startTime,
-      claudemd_length: claudeMd?.length ?? 0,
-      claudemd_disabled: Boolean(shouldDisableClaudeMd),
+      puamd_length: puaMd?.length ?? 0,
+      puamd_disabled: Boolean(shouldDisablePUAMd),
     })
 
     return {
-      ...(claudeMd && { claudeMd }),
+      ...(puaMd && { puaMd }),
       currentDate: `Today's date is ${getLocalISODate()}.`,
     }
   },

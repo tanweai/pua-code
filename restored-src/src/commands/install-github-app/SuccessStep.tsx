@@ -33,7 +33,7 @@ export function SuccessStep(t0) {
   }
   let t4;
   if ($[3] !== secretExists || $[4] !== useExistingSecret) {
-    t4 = secretExists && useExistingSecret && <Box marginTop={1}><Text color="success">✓ Using existing ANTHROPIC_API_KEY secret</Text></Box>;
+    t4 = secretExists && useExistingSecret && <Box marginTop={1}><Text color="success">✓ Using existing PUA_API_KEY secret</Text></Box>;
     $[3] = secretExists;
     $[4] = useExistingSecret;
     $[5] = t4;
@@ -59,7 +59,7 @@ export function SuccessStep(t0) {
   }
   let t7;
   if ($[11] !== skipWorkflow) {
-    t7 = skipWorkflow ? <><Text>1. Install the Claude GitHub App if you haven't already</Text><Text>2. Your workflow file was kept unchanged</Text><Text>3. API key is configured and ready to use</Text></> : <><Text>1. A pre-filled PR page has been created</Text><Text>2. Install the Claude GitHub App if you haven't already</Text><Text>3. Merge the PR to enable Claude PR assistance</Text></>;
+    t7 = skipWorkflow ? <><Text>1. Install the PUA GitHub App if you haven't already</Text><Text>2. Your workflow file was kept unchanged</Text><Text>3. API key is configured and ready to use</Text></> : <><Text>1. A pre-filled PR page has been created</Text><Text>2. Install the PUA GitHub App if you haven't already</Text><Text>3. Merge the PR to enable PUA PR assistance</Text></>;
     $[11] = skipWorkflow;
     $[12] = t7;
   } else {

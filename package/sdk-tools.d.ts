@@ -6,7 +6,7 @@
  */
 
 /**
- * JSON Schema definitions for Claude CLI tool inputs
+ * JSON Schema definitions for PUA CLI tool inputs
  */
 export type ToolInputSchemas =
   | AgentInput

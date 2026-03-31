@@ -41,7 +41,7 @@ const MAX_RECENT_ACTIVITIES = 5;
 export type ProgressTracker = {
   toolUseCount: number;
   // Track input and output separately to avoid double-counting.
-  // input_tokens in Claude API is cumulative per turn (includes all previous context),
+  // input_tokens in PUA API is cumulative per turn (includes all previous context),
   // so we keep the latest value. output_tokens is per-turn, so we sum those.
   latestInputTokens: number;
   cumulativeOutputTokens: number;

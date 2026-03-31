@@ -129,7 +129,7 @@ function ripGrepRaw(
   // WSL has severe performance penalty for file reads (3-5x slower on WSL2)
   const defaultTimeout = getPlatform() === 'wsl' ? 60_000 : 20_000
   const parsedSeconds =
-    parseInt(process.env.CLAUDE_CODE_GLOB_TIMEOUT_SECONDS || '', 10) || 0
+    parseInt(process.env.PUA_CODE_GLOB_TIMEOUT_SECONDS || '', 10) || 0
   const timeout = parsedSeconds > 0 ? parsedSeconds * 1000 : defaultTimeout
 
   // For embedded ripgrep, use spawn with argv0 (execFile doesn't support argv0 properly)
@@ -441,7 +441,7 @@ export async function ripGrep(
         logError(error)
       }
 
-      // If we timed out with no results, throw an error so Claude knows the search
+      // If we timed out with no results, throw an error so PUA knows the search
       // didn't complete rather than thinking there were no matches
       if (isTimeout && lines.length === 0) {
         reject(

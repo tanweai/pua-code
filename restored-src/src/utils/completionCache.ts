@@ -24,10 +24,10 @@ type ShellInfo = {
 function detectShell(): ShellInfo | null {
   const shell = process.env.SHELL || ''
   const home = homedir()
-  const claudeDir = join(home, '.claude')
+  const puaDir = join(home, '.pua')
 
   if (shell.endsWith('/zsh') || shell.endsWith('/zsh.exe')) {
-    const cacheFile = join(claudeDir, 'completion.zsh')
+    const cacheFile = join(puaDir, 'completion.zsh')
     return {
       name: 'zsh',
       rcFile: join(home, '.zshrc'),
@@ -37,7 +37,7 @@ function detectShell(): ShellInfo | null {
     }
   }
   if (shell.endsWith('/bash') || shell.endsWith('/bash.exe')) {
-    const cacheFile = join(claudeDir, 'completion.bash')
+    const cacheFile = join(puaDir, 'completion.bash')
     return {
       name: 'bash',
       rcFile: join(home, '.bashrc'),
@@ -48,7 +48,7 @@ function detectShell(): ShellInfo | null {
   }
   if (shell.endsWith('/fish') || shell.endsWith('/fish.exe')) {
     const xdg = process.env.XDG_CONFIG_HOME || join(home, '.config')
-    const cacheFile = join(claudeDir, 'completion.fish')
+    const cacheFile = join(puaDir, 'completion.fish')
     return {
       name: 'fish',
       rcFile: join(xdg, 'fish', 'config.fish'),
@@ -83,21 +83,21 @@ export async function setupShellCompletion(theme: ThemeName): Promise<string> {
     await mkdir(dirname(shell.cacheFile), { recursive: true })
   } catch (e: unknown) {
     logError(e)
-    return `${EOL}${color('warning', theme)(`Could not write ${shell.name} completion cache`)}${EOL}${chalk.dim(`Run manually: claude completion ${shell.shellFlag} > ${shell.cacheFile}`)}${EOL}`
+    return `${EOL}${color('warning', theme)(`Could not write ${shell.name} completion cache`)}${EOL}${chalk.dim(`Run manually: pua completion ${shell.shellFlag} > ${shell.cacheFile}`)}${EOL}`
   }
 
   // Generate the completion script by writing directly to the cache file.
   // Using --output avoids piping through stdout where process.exit() can
   // truncate output before the pipe buffer drains.
-  const claudeBin = process.argv[1] || 'claude'
-  const result = await execFileNoThrow(claudeBin, [
+  const puaBin = process.argv[1] || 'pua'
+  const result = await execFileNoThrow(puaBin, [
     'completion',
     shell.shellFlag,
     '--output',
     shell.cacheFile,
   ])
   if (result.code !== 0) {
-    return `${EOL}${color('warning', theme)(`Could not generate ${shell.name} shell completions`)}${EOL}${chalk.dim(`Run manually: claude completion ${shell.shellFlag} > ${shell.cacheFile}`)}${EOL}`
+    return `${EOL}${color('warning', theme)(`Could not generate ${shell.name} shell completions`)}${EOL}${chalk.dim(`Run manually: pua completion ${shell.shellFlag} > ${shell.cacheFile}`)}${EOL}`
   }
 
   // Check if rc file already sources completions
@@ -105,7 +105,7 @@ export async function setupShellCompletion(theme: ThemeName): Promise<string> {
   try {
     existing = await readFile(shell.rcFile, { encoding: 'utf-8' })
     if (
-      existing.includes('claude completion') ||
+      existing.includes('pua completion') ||
       existing.includes(shell.cacheFile)
     ) {
       return `${EOL}${color('success', theme)(`Shell completions updated for ${shell.name}`)}${EOL}${chalk.dim(`See ${formatPathLink(shell.rcFile)}`)}${EOL}`
@@ -123,7 +123,7 @@ export async function setupShellCompletion(theme: ThemeName): Promise<string> {
     await mkdir(configDir, { recursive: true })
 
     const separator = existing && !existing.endsWith('\n') ? '\n' : ''
-    const content = `${existing}${separator}\n# Claude Code shell completions\n${shell.completionLine}\n`
+    const content = `${existing}${separator}\n# PUA Code shell completions\n${shell.completionLine}\n`
     await writeFile(shell.rcFile, content, { encoding: 'utf-8' })
 
     return `${EOL}${color('success', theme)(`Installed ${shell.name} shell completions`)}${EOL}${chalk.dim(`Added to ${formatPathLink(shell.rcFile)}`)}${EOL}${chalk.dim(`Run: source ${shell.rcFile}`)}${EOL}`
@@ -134,8 +134,8 @@ export async function setupShellCompletion(theme: ThemeName): Promise<string> {
 }
 
 /**
- * Regenerate cached shell completion scripts in ~/.claude/.
- * Called after `claude update` so completions stay in sync with the new binary.
+ * Regenerate cached shell completion scripts in ~/.pua/.
+ * Called after `pua update` so completions stay in sync with the new binary.
  */
 export async function regenerateCompletionCache(): Promise<void> {
   const shell = detectShell()
@@ -145,8 +145,8 @@ export async function regenerateCompletionCache(): Promise<void> {
 
   logForDebugging(`update: Regenerating ${shell.name} completion cache`)
 
-  const claudeBin = process.argv[1] || 'claude'
-  const result = await execFileNoThrow(claudeBin, [
+  const puaBin = process.argv[1] || 'pua'
+  const result = await execFileNoThrow(puaBin, [
     'completion',
     shell.shellFlag,
     '--output',

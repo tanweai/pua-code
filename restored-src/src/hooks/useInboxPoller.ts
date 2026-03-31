@@ -74,7 +74,7 @@ import {
 /**
  * Get the agent name to poll for messages.
  * - In-process teammates return undefined (they use waitForNextPromptOrShutdown instead)
- * - Process-based teammates use their CLAUDE_CODE_AGENT_NAME
+ * - Process-based teammates use their PUA_CODE_AGENT_NAME
  * - Team leads use their name from teamContext.teammates
  * - Standalone sessions return undefined
  */
@@ -807,8 +807,8 @@ export function useInboxPoller({
       return
     }
 
-    // Format messages with XML wrapper for Claude (include color if available)
-    // Transform plan approval requests to include instructions for Claude
+    // Format messages with XML wrapper for PUA (include color if available)
+    // Transform plan approval requests to include instructions for PUA
     const formatted = regularMessages
       .map(m => {
         const colorAttr = m.color ? ` color="${m.color}"` : ''
@@ -914,7 +914,7 @@ export function useInboxPoller({
       `[InboxPoller] Session idle, delivering ${pendingMessages.length} pending message(s)`,
     )
 
-    // Format messages with XML wrapper for Claude (include color if available)
+    // Format messages with XML wrapper for PUA (include color if available)
     const formatted = pendingMessages
       .map(m => {
         const colorAttr = m.color ? ` color="${m.color}"` : ''

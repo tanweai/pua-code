@@ -4,9 +4,9 @@
  * This module provides the single source of truth for the plugins directory path.
  * It supports switching between 'plugins' and 'cowork_plugins' directories via:
  * - CLI flag: --cowork
- * - Environment variable: CLAUDE_CODE_USE_COWORK_PLUGINS
+ * - Environment variable: PUA_CODE_USE_COWORK_PLUGINS
  *
- * The base directory can be overridden via CLAUDE_CODE_PLUGIN_CACHE_DIR.
+ * The base directory can be overridden via PUA_CODE_PLUGIN_CACHE_DIR.
  */
 
 import { mkdirSync } from 'fs'
@@ -14,7 +14,7 @@ import { readdir, rm, stat } from 'fs/promises'
 import { delimiter, join } from 'path'
 import { getUseCoworkPlugins } from '../../bootstrap/state.js'
 import { logForDebugging } from '../debug.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from '../envUtils.js'
+import { getPUAConfigHomeDir, isEnvTruthy } from '../envUtils.js'
 import { errorMessage, isFsInaccessible } from '../errors.js'
 import { formatFileSize } from '../format.js'
 import { expandTilde } from '../permissions/pathValidation.js'
@@ -28,7 +28,7 @@ const COWORK_PLUGINS_DIR = 'cowork_plugins'
  *
  * Priority:
  * 1. Session state (set by CLI flag --cowork)
- * 2. Environment variable CLAUDE_CODE_USE_COWORK_PLUGINS
+ * 2. Environment variable PUA_CODE_USE_COWORK_PLUGINS
  * 3. Default: 'plugins'
  */
 function getPluginsDirectoryName(): string {
@@ -37,7 +37,7 @@ function getPluginsDirectoryName(): string {
     return COWORK_PLUGINS_DIR
   }
   // Fall back to env var
-  if (isEnvTruthy(process.env.CLAUDE_CODE_USE_COWORK_PLUGINS)) {
+  if (isEnvTruthy(process.env.PUA_CODE_USE_COWORK_PLUGINS)) {
     return COWORK_PLUGINS_DIR
   }
   return PLUGINS_DIR
@@ -47,26 +47,26 @@ function getPluginsDirectoryName(): string {
  * Get the full path to the plugins directory.
  *
  * Priority:
- * 1. CLAUDE_CODE_PLUGIN_CACHE_DIR env var (explicit override)
- * 2. Default: ~/.claude/plugins or ~/.claude/cowork_plugins
+ * 1. PUA_CODE_PLUGIN_CACHE_DIR env var (explicit override)
+ * 2. Default: ~/.pua/plugins or ~/.pua/cowork_plugins
  */
 export function getPluginsDirectory(): string {
-  // expandTilde: when CLAUDE_CODE_PLUGIN_CACHE_DIR is set via settings.json
+  // expandTilde: when PUA_CODE_PLUGIN_CACHE_DIR is set via settings.json
   // `env` (not shell), ~ is not expanded by the shell. Without this, a value
-  // like "~/.claude/plugins" becomes a literal `~` directory created in the
+  // like "~/.pua/plugins" becomes a literal `~` directory created in the
   // cwd of every project (gh-30794 / CC-212).
-  const envOverride = process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR
+  const envOverride = process.env.PUA_CODE_PLUGIN_CACHE_DIR
   if (envOverride) {
     return expandTilde(envOverride)
   }
-  return join(getClaudeConfigHomeDir(), getPluginsDirectoryName())
+  return join(getPUAConfigHomeDir(), getPluginsDirectoryName())
 }
 
 /**
  * Get the read-only plugin seed directories, if configured.
  *
  * Customers can pre-bake a populated plugins directory into their container
- * image and point CLAUDE_CODE_PLUGIN_SEED_DIR at it. CC will use it as a
+ * image and point PUA_CODE_PLUGIN_SEED_DIR at it. CC will use it as a
  * read-only fallback layer under the primary plugins directory — marketplaces
  * and plugin caches found in the seed are used in place without re-cloning.
  *
@@ -75,7 +75,7 @@ export function getPluginsDirectory(): string {
  * seed that contains a given marketplace or plugin cache wins.
  *
  * Seed structure mirrors the primary plugins directory:
- *   $CLAUDE_CODE_PLUGIN_SEED_DIR/
+ *   $PUA_CODE_PLUGIN_SEED_DIR/
  *     known_marketplaces.json
  *     marketplaces/<name>/...
  *     cache/<marketplace>/<plugin>/<version>/...
@@ -84,7 +84,7 @@ export function getPluginsDirectory(): string {
  */
 export function getPluginSeedDirs(): string[] {
   // Same tilde-expansion rationale as getPluginsDirectory (gh-30794).
-  const raw = process.env.CLAUDE_CODE_PLUGIN_SEED_DIR
+  const raw = process.env.PUA_CODE_PLUGIN_SEED_DIR
   if (!raw) return []
   return raw.split(delimiter).filter(Boolean).map(expandTilde)
 }
@@ -101,13 +101,13 @@ export function pluginDataDirPath(pluginId: string): string {
 
 /**
  * Persistent per-plugin data directory, exposed to plugins as
- * ${CLAUDE_PLUGIN_DATA}. Unlike the version-scoped install cache
- * (${CLAUDE_PLUGIN_ROOT}, which is orphaned and GC'd on every update),
+ * ${PUA_PLUGIN_DATA}. Unlike the version-scoped install cache
+ * (${PUA_PLUGIN_ROOT}, which is orphaned and GC'd on every update),
  * this survives plugin updates — only removed on last-scope uninstall.
  *
  * Creates the directory on call (mkdir). The *lazy* behavior is at the
  * substitutePluginVariables call site — the DATA pattern uses function-form
- * .replace() so this isn't invoked unless ${CLAUDE_PLUGIN_DATA} is present
+ * .replace() so this isn't invoked unless ${PUA_PLUGIN_DATA} is present
  * (ROOT also uses function-form, but for $-pattern safety, not laziness).
  * Env-var export sites (MCP/LSP server env, hook env) call this eagerly
  * since subprocesses may expect the dir to exist before writing to it.

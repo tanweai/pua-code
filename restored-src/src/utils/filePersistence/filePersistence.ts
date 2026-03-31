@@ -40,9 +40,9 @@ import {
  * Execute file persistence for modified files in the outputs directory.
  *
  * Assembles all config internally:
- * - Checks environment kind (CLAUDE_CODE_ENVIRONMENT_KIND)
+ * - Checks environment kind (PUA_CODE_ENVIRONMENT_KIND)
  * - Retrieves session access token
- * - Requires CLAUDE_CODE_REMOTE_SESSION_ID for session ID
+ * - Requires PUA_CODE_REMOTE_SESSION_ID for session ID
  *
  * @param turnStartTime - The timestamp when the turn started
  * @param signal - Optional abort signal for cancellation
@@ -62,11 +62,11 @@ export async function runFilePersistence(
     return null
   }
 
-  const sessionId = process.env.CLAUDE_CODE_REMOTE_SESSION_ID
+  const sessionId = process.env.PUA_CODE_REMOTE_SESSION_ID
   if (!sessionId) {
     logError(
       new Error(
-        'File persistence enabled but CLAUDE_CODE_REMOTE_SESSION_ID is not set',
+        'File persistence enabled but PUA_CODE_REMOTE_SESSION_ID is not set',
       ),
     )
     return null
@@ -271,16 +271,16 @@ export async function executeFilePersistence(
 /**
  * Check if file persistence is enabled.
  * Requires: feature flag ON, valid environment kind, session access token,
- * and CLAUDE_CODE_REMOTE_SESSION_ID.
+ * and PUA_CODE_REMOTE_SESSION_ID.
  * This ensures only public-api/sessions users trigger file persistence,
- * not normal Claude Code CLI users.
+ * not normal PUA Code CLI users.
  */
 export function isFilePersistenceEnabled(): boolean {
   if (feature('FILE_PERSISTENCE')) {
     return (
       getEnvironmentKind() === 'byoc' &&
       !!getSessionIngressAuthToken() &&
-      !!process.env.CLAUDE_CODE_REMOTE_SESSION_ID
+      !!process.env.PUA_CODE_REMOTE_SESSION_ID
     )
   }
   return false

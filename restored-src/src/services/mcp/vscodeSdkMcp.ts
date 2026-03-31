@@ -34,7 +34,7 @@ let vscodeMcpClient: ConnectedMCPServer | null = null
 
 /**
  * Sends a file_updated notification to the VSCode MCP server. This is used to
- * notify VSCode when files are edited or written by Claude.
+ * notify VSCode when files are edited or written by PUA.
  */
 export function notifyVscodeFileUpdated(
   filePath: string,
@@ -62,7 +62,7 @@ export function notifyVscodeFileUpdated(
  * Sets up the speicial internal VSCode MCP for bidirectional communication using notifications.
  */
 export function setupVscodeSdkMcp(sdkClients: MCPServerConnection[]): void {
-  const client = sdkClients.find(client => client.name === 'claude-vscode')
+  const client = sdkClients.find(client => client.name === 'pua-vscode')
 
   if (client && client.type === 'connected') {
     // Store the client reference for later use
@@ -92,7 +92,7 @@ export function setupVscodeSdkMcp(sdkClients: MCPServerConnection[]): void {
         'tengu_quiet_fern',
         false,
       ),
-      // In-band OAuth via claude_authenticate (vs. extension-native PKCE).
+      // In-band OAuth via pua_authenticate (vs. extension-native PKCE).
       tengu_vscode_cc_auth: getFeatureValue_CACHED_MAY_BE_STALE(
         'tengu_vscode_cc_auth',
         false,

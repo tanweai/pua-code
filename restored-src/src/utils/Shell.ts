@@ -30,7 +30,7 @@ export type { ExecResult } from './ShellCommand.js'
 
 import { accessSync } from 'fs'
 import { onCwdChangedForHooks } from './hooks/fileChangedWatcher.js'
-import { getClaudeTempDirName } from './permissions/filesystem.js'
+import { getPUATempDirName } from './permissions/filesystem.js'
 import { getPlatform } from './platform.js'
 import { SandboxManager } from './sandbox/sandbox-adapter.js'
 import { invalidateSessionEnvCache } from './sessionEnvironment.js'
@@ -72,7 +72,7 @@ function isExecutable(shellPath: string): boolean {
  */
 export async function findSuitableShell(): Promise<string> {
   // Check for explicit shell override first
-  const shellOverride = process.env.CLAUDE_CODE_SHELL
+  const shellOverride = process.env.PUA_CODE_SHELL
   if (shellOverride) {
     // Validate it's a supported shell type
     const isSupported =
@@ -83,7 +83,7 @@ export async function findSuitableShell(): Promise<string> {
     } else {
       // Note, if we ever want to add support for new shells here we'll need to update or Bash tool parsing to account for this
       logForDebugging(
-        `CLAUDE_CODE_SHELL="${shellOverride}" is not a valid bash/zsh path, falling back to detection`,
+        `PUA_CODE_SHELL="${shellOverride}" is not a valid bash/zsh path, falling back to detection`,
       )
     }
   }
@@ -127,7 +127,7 @@ export async function findSuitableShell(): Promise<string> {
   // If no valid shell found, throw a helpful error
   if (!shellPath) {
     const errorMsg =
-      'No suitable shell found. Claude CLI requires a Posix shell environment. ' +
+      'No suitable shell found. PUA CLI requires a Posix shell environment. ' +
       'Please ensure you have a valid shell installed and the SHELL environment variable set.'
     logError(new Error(errorMsg))
     throw new Error(errorMsg)
@@ -202,8 +202,8 @@ export async function exec(
 
   // Sandbox temp directory - use per-user directory name to prevent multi-user permission conflicts
   const sandboxTmpDir = posixJoin(
-    process.env.CLAUDE_CODE_TMPDIR || '/tmp',
-    getClaudeTempDirName(),
+    process.env.PUA_CODE_TMPDIR || '/tmp',
+    getPUATempDirName(),
   )
 
   const { commandString: builtCommand, cwdFilePath } =
@@ -232,7 +232,7 @@ export async function exec(
       cwd = fallback
     } catch {
       return createFailedCommand(
-        `Working directory "${cwd}" no longer exists. Please restart Claude from an existing directory.`,
+        `Working directory "${cwd}" no longer exists. Please restart PUA from an existing directory.`,
       )
     }
   }
@@ -318,11 +318,11 @@ export async function exec(
         ...subprocessEnv(),
         SHELL: shellType === 'bash' ? binShell : undefined,
         GIT_EDITOR: 'true',
-        CLAUDECODE: '1',
+        PUACODE: '1',
         ...envOverrides,
         ...(process.env.USER_TYPE === 'ant'
           ? {
-              CLAUDE_CODE_SESSION_ID: getSessionId(),
+              PUA_CODE_SESSION_ID: getSessionId(),
             }
           : {}),
       },

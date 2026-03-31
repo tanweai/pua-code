@@ -12,11 +12,11 @@
 // that sandbox network restrictions require explicit user permission rules.
 
 export const PREAPPROVED_HOSTS = new Set([
-  // Anthropic
-  'platform.claude.com',
-  'code.claude.com',
+  // PUA
+  'platform.pua.com',
+  'code.pua.com',
   'modelcontextprotocol.io',
-  'github.com/anthropics',
+  'github.com/puas',
   'agentskills.io',
 
   // Top Programming Languages
@@ -132,7 +132,7 @@ export const PREAPPROVED_HOSTS = new Set([
 
 // Split once at module load so lookups are O(1) Set.has() for the common
 // hostname-only case, falling back to a small per-host path-prefix list
-// for the handful of path-scoped entries (e.g., "github.com/anthropics").
+// for the handful of path-scoped entries (e.g., "github.com/puas").
 const { HOSTNAME_ONLY, PATH_PREFIXES } = (() => {
   const hosts = new Set<string>()
   const paths = new Map<string, string[]>()
@@ -156,8 +156,8 @@ export function isPreapprovedHost(hostname: string, pathname: string): boolean {
   const prefixes = PATH_PREFIXES.get(hostname)
   if (prefixes) {
     for (const p of prefixes) {
-      // Enforce path segment boundaries: "/anthropics" must not match
-      // "/anthropics-evil/malware". Only exact match or a "/" after the
+      // Enforce path segment boundaries: "/puas" must not match
+      // "/puas-evil/malware". Only exact match or a "/" after the
       // prefix is allowed.
       if (pathname === p || pathname.startsWith(p + '/')) return true
     }

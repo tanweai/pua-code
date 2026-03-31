@@ -1,7 +1,7 @@
 /**
  * Plugin Loader Module
  *
- * This module is responsible for discovering, loading, and validating Claude Code plugins
+ * This module is responsible for discovering, loading, and validating PUA Code plugins
  * from various sources including marketplaces and git repositories.
  *
  * NPM packages are also supported but must be referenced through marketplaces - the marketplace
@@ -163,7 +163,7 @@ export function getVersionedCachePathIn(
 
 /**
  * Get versioned cache path for a plugin under the primary plugins directory.
- * Format: ~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/
+ * Format: ~/.pua/plugins/cache/{marketplace}/{plugin}/{version}/
  *
  * @param pluginId - Plugin identifier in format "name@marketplace"
  * @param version - Version string (semver, git SHA, etc.)
@@ -239,7 +239,7 @@ export async function probeSeedCacheAnyVersion(
 
 /**
  * Get legacy (non-versioned) cache path for a plugin.
- * Format: ~/.claude/plugins/cache/{plugin-name}/
+ * Format: ~/.pua/plugins/cache/{plugin-name}/
  *
  * Used for backward compatibility with existing installations.
  *
@@ -671,7 +671,7 @@ async function installFromGitHub(
     )
   }
   // Use HTTPS for CCR (no SSH keys), SSH for normal CLI
-  const gitUrl = isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)
+  const gitUrl = isEnvTruthy(process.env.PUA_CODE_REMOTE)
     ? `https://github.com/${repo}.git`
     : `git@github.com:${repo}.git`
   return installFromGit(gitUrl, targetPath, ref, sha)
@@ -680,12 +680,12 @@ async function installFromGitHub(
 /**
  * Resolve a git-subdir `url` field to a clonable git URL.
  * Accepts GitHub owner/repo shorthand (converted to ssh or https depending on
- * CLAUDE_CODE_REMOTE) or any URL that passes validateGitUrl (https, http,
+ * PUA_CODE_REMOTE) or any URL that passes validateGitUrl (https, http,
  * file, git@ ssh).
  */
 function resolveGitSubdirUrl(url: string): string {
   if (/^[a-zA-Z0-9-_.]+\/[a-zA-Z0-9-_.]+$/.test(url)) {
-    return isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)
+    return isEnvTruthy(process.env.PUA_CODE_REMOTE)
       ? `https://github.com/${url}.git`
       : `git@github.com:${url}.git`
   }
@@ -976,7 +976,7 @@ export async function cachePlugin(
     throw error
   }
 
-  const manifestPath = join(tempPath, '.claude-plugin', 'plugin.json')
+  const manifestPath = join(tempPath, '.pua-plugin', 'plugin.json')
   const legacyManifestPath = join(tempPath, 'plugin.json')
   let manifest: PluginManifest
 
@@ -1140,7 +1140,7 @@ export async function cachePlugin(
  *
  * @param manifestPath - Full path to the plugin.json file
  * @param pluginName - Name to use in default manifest (e.g., "my-plugin")
- * @param source - Source description for default manifest (e.g., "git:repo" or ".claude-plugin/name")
+ * @param source - Source description for default manifest (e.g., "git:repo" or ".pua-plugin/name")
  * @returns A valid PluginManifest object (either loaded or default)
  * @throws Error if manifest exists but is invalid (corrupt JSON or schema validation failure)
  */
@@ -1339,7 +1339,7 @@ async function validatePluginPaths(
  * are reported as errors but don't prevent plugin loading.
  *
  * @param pluginPath - Absolute path to the plugin directory
- * @param source - Source identifier (e.g., "git:repo", ".claude-plugin/my-plugin")
+ * @param source - Source identifier (e.g., "git:repo", ".pua-plugin/my-plugin")
  * @param enabled - Initial enabled state (may be overridden by settings)
  * @param fallbackName - Name to use if manifest doesn't specify one
  * @param strict - When true, adds errors for duplicate hook files (default: true)
@@ -1356,7 +1356,7 @@ export async function createPluginFromPath(
 
   // Step 1: Load or create the plugin manifest
   // This provides metadata about the plugin (name, version, etc.)
-  const manifestPath = join(pluginPath, '.claude-plugin', 'plugin.json')
+  const manifestPath = join(pluginPath, '.pua-plugin', 'plugin.json')
   const manifest = await loadPluginManifest(manifestPath, fallbackName, source)
 
   // Step 2: Create the base plugin object
@@ -1365,7 +1365,7 @@ export async function createPluginFromPath(
     name: manifest.name, // Use name from manifest (or fallback)
     manifest, // Store full manifest for later use
     path: pluginPath, // Absolute path to plugin directory
-    source, // Source identifier (e.g., "git:repo" or ".claude-plugin/name")
+    source, // Source identifier (e.g., "git:repo" or ".pua-plugin/name")
     repository: source, // For backward compatibility with Plugin Repository
     enabled, // Current enabled state
   }
@@ -2229,7 +2229,7 @@ async function loadPluginFromMarketplaceEntry(
       // Try to load manifest from plugin directory to check for version field first
       const manifestPath = join(
         sourcePluginPath,
-        '.claude-plugin',
+        '.pua-plugin',
         'plugin.json',
       )
       let pluginManifest: PluginManifest | undefined
@@ -2427,7 +2427,7 @@ async function finishLoadingPluginFromPath(
   const errors: PluginError[] = []
 
   // Check if plugin.json exists to determine if we should use marketplace manifest
-  const manifestPath = join(pluginPath, '.claude-plugin', 'plugin.json')
+  const manifestPath = join(pluginPath, '.pua-plugin', 'plugin.json')
   const hasManifest = await pathExists(manifestPath)
 
   const { plugin, errors: pluginErrors } = await createPluginFromPath(
@@ -3120,9 +3120,9 @@ export const loadAllPlugins = memoize(async (): Promise<PluginLoadResult> => {
  * plugins. Use loadAllPlugins() in explicit refresh paths (/plugins,
  * refresh.ts, headlessPluginInstall) where fresh source is the intent.
  *
- * CLAUDE_CODE_SYNC_PLUGIN_INSTALL=1 delegates to the full loader — that
+ * PUA_CODE_SYNC_PLUGIN_INSTALL=1 delegates to the full loader — that
  * mode explicitly opts into blocking install before first query, and
- * main.tsx's getClaudeCodeMcpConfigs()/getInitialSettings().agent run
+ * main.tsx's getPUACodeMcpConfigs()/getInitialSettings().agent run
  * BEFORE runHeadless() can warm this cache. First-run CCR/headless has
  * no installed_plugins.json, so cache-only would miss plugin MCP servers
  * and plugin settings (the agent key). The interactive startup win is
@@ -3136,7 +3136,7 @@ export const loadAllPlugins = memoize(async (): Promise<PluginLoadResult> => {
  */
 export const loadAllPluginsCacheOnly = memoize(
   async (): Promise<PluginLoadResult> => {
-    if (isEnvTruthy(process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL)) {
+    if (isEnvTruthy(process.env.PUA_CODE_SYNC_PLUGIN_INSTALL)) {
       return loadAllPlugins()
     }
     return assemblePluginLoadResult(() =>
@@ -3218,7 +3218,7 @@ async function assemblePluginLoadResult(
  *
  * Use cases:
  * - After installing/uninstalling plugins
- * - After modifying .claude-plugin/ directory (for export)
+ * - After modifying .pua-plugin/ directory (for export)
  * - After changing enabledPlugins settings
  * - When debugging plugin loading issues
  */

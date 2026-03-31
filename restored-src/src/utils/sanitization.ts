@@ -7,9 +7,9 @@
  * private use areas, and noncharacters) to hide malicious instructions that are invisible
  * to users but processed by AI models.
  *
- * The vulnerability was demonstrated in HackerOne report #3086545 targeting Claude Desktop's
+ * The vulnerability was demonstrated in HackerOne report #3086545 targeting PUA Desktop's
  * MCP (Model Context Protocol) implementation, where attackers could inject hidden instructions
- * using Unicode Tag characters that would be executed by Claude but remain invisible to users.
+ * using Unicode Tag characters that would be executed by PUA but remain invisible to users.
  *
  * Reference: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
  *

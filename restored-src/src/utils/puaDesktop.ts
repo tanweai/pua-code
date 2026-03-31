@@ -10,12 +10,12 @@ import { safeParseJSON } from './json.js'
 import { logError } from './log.js'
 import { getPlatform, SUPPORTED_PLATFORMS } from './platform.js'
 
-export async function getClaudeDesktopConfigPath(): Promise<string> {
+export async function getPUADesktopConfigPath(): Promise<string> {
   const platform = getPlatform()
 
   if (!SUPPORTED_PLATFORMS.includes(platform)) {
     throw new Error(
-      `Unsupported platform: ${platform} - Claude Desktop integration only works on macOS and WSL.`,
+      `Unsupported platform: ${platform} - PUA Desktop integration only works on macOS and WSL.`,
     )
   }
 
@@ -24,8 +24,8 @@ export async function getClaudeDesktopConfigPath(): Promise<string> {
       homedir(),
       'Library',
       'Application Support',
-      'Claude',
-      'claude_desktop_config.json',
+      'PUA',
+      'pua_desktop_config.json',
     )
   }
 
@@ -37,7 +37,7 @@ export async function getClaudeDesktopConfigPath(): Promise<string> {
   if (windowsHome) {
     // Remove drive letter and convert to WSL path format
     const wslPath = windowsHome.replace(/^[A-Z]:/, '')
-    const configPath = `/mnt/c${wslPath}/AppData/Roaming/Claude/claude_desktop_config.json`
+    const configPath = `/mnt/c${wslPath}/AppData/Roaming/PUA/pua_desktop_config.json`
 
     // Check if the file exists
     try {
@@ -56,7 +56,7 @@ export async function getClaudeDesktopConfigPath(): Promise<string> {
     try {
       const userDirs = await readdir(usersDir, { withFileTypes: true })
 
-      // Look for Claude Desktop config in each user directory
+      // Look for PUA Desktop config in each user directory
       for (const user of userDirs) {
         if (
           user.name === 'Public' ||
@@ -72,8 +72,8 @@ export async function getClaudeDesktopConfigPath(): Promise<string> {
           user.name,
           'AppData',
           'Roaming',
-          'Claude',
-          'claude_desktop_config.json',
+          'PUA',
+          'pua_desktop_config.json',
         )
 
         try {
@@ -91,20 +91,20 @@ export async function getClaudeDesktopConfigPath(): Promise<string> {
   }
 
   throw new Error(
-    'Could not find Claude Desktop config file in Windows. Make sure Claude Desktop is installed on Windows.',
+    'Could not find PUA Desktop config file in Windows. Make sure PUA Desktop is installed on Windows.',
   )
 }
 
-export async function readClaudeDesktopMcpServers(): Promise<
+export async function readPUADesktopMcpServers(): Promise<
   Record<string, McpServerConfig>
 > {
   if (!SUPPORTED_PLATFORMS.includes(getPlatform())) {
     throw new Error(
-      'Unsupported platform - Claude Desktop integration only works on macOS and WSL.',
+      'Unsupported platform - PUA Desktop integration only works on macOS and WSL.',
     )
   }
   try {
-    const configPath = await getClaudeDesktopConfigPath()
+    const configPath = await getPUADesktopConfigPath()
 
     let configContent: string
     try {

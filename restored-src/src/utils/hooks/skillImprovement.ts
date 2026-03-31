@@ -6,7 +6,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
   logEvent,
 } from '../../services/analytics/index.js'
-import { queryModelWithoutStreaming } from '../../services/api/claude.js'
+import { queryModelWithoutStreaming } from '../../services/api/pua.js'
 import { getEmptyToolPermissionContext } from '../../Tool.js'
 import type { Message } from '../../types/message.js'
 import { createAbortController } from '../abortController.js'
@@ -194,8 +194,8 @@ export async function applySkillImprovement(
   const { join } = await import('path')
   const fs = await import('fs/promises')
 
-  // Skills live at .claude/skills/<name>/SKILL.md relative to CWD
-  const filePath = join(getCwd(), '.claude', 'skills', skillName, 'SKILL.md')
+  // Skills live at .pua/skills/<name>/SKILL.md relative to CWD
+  const filePath = join(getCwd(), '.pua', 'skills', skillName, 'SKILL.md')
 
   let currentContent: string
   try {

@@ -27,7 +27,7 @@ import {
 import type { Message } from '../types/message.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
+  getPUAAIOAuthTokens,
   handleOAuth401Error,
 } from '../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
@@ -100,7 +100,7 @@ export type InitBridgeOptions = {
   perpetual?: boolean
   /**
    * When true, the bridge only forwards events outbound (no SSE inbound
-   * stream). Used by CCR mirror mode — local sessions visible on claude.ai
+   * stream). Used by CCR mirror mode — local sessions visible on pua.ai
    * without enabling inbound control.
    */
   outboundOnly?: boolean
@@ -141,7 +141,7 @@ export async function initReplBridge(
   // since each implementation has its own floor (tengu_bridge_min_version
   // for v1, tengu_bridge_repl_v2_config.min_version for v2).
 
-  // 2. Check OAuth — must be signed in with claude.ai. Runs before the
+  // 2. Check OAuth — must be signed in with pua.ai. Runs before the
   // policy check so console-auth users get the actionable "/login" hint
   // instead of a misleading policy error from a stale/wrong-org cache.
   if (!getBridgeAccessToken()) {
@@ -161,7 +161,7 @@ export async function initReplBridge(
     return null
   }
 
-  // When CLAUDE_BRIDGE_OAUTH_TOKEN is set (ant-only local dev), the bridge
+  // When PUA_BRIDGE_OAUTH_TOKEN is set (ant-only local dev), the bridge
   // uses that token directly via getBridgeAccessToken() — keychain state is
   // irrelevant. Skip 2b/2c to preserve that decoupling: an expired keychain
   // token shouldn't block a bridge connection that doesn't use it.
@@ -178,7 +178,7 @@ export async function initReplBridge(
     if (
       cfg.bridgeOauthDeadExpiresAt != null &&
       (cfg.bridgeOauthDeadFailCount ?? 0) >= 3 &&
-      getClaudeAIOAuthTokens()?.expiresAt === cfg.bridgeOauthDeadExpiresAt
+      getPUAAIOAuthTokens()?.expiresAt === cfg.bridgeOauthDeadExpiresAt
     ) {
       logForDebugging(
         `[bridge:repl] Skipping: cross-process backoff (dead token seen ${cfg.bridgeOauthDeadFailCount} times)`,
@@ -215,7 +215,7 @@ export async function initReplBridge(
     // + transient refresh endpoint blip (5xx/timeout/wifi-reconnect) would
     // falsely trip a buffered check; the still-valid token would connect fine.
     // Check actual expiry instead: past-expiry AND refresh-failed → truly dead.
-    const tokens = getClaudeAIOAuthTokens()
+    const tokens = getPUAAIOAuthTokens()
     if (tokens && tokens.expiresAt !== null && tokens.expiresAt <= Date.now()) {
       logBridgeSkip(
         'oauth_expired_unrefreshable',
@@ -246,14 +246,14 @@ export async function initReplBridge(
 
   // 5. Derive session title. Precedence: explicit initialName → /rename
   // (session storage) → last meaningful user message → generated slug.
-  // Cosmetic only (claude.ai session list); the model never sees it.
+  // Cosmetic only (pua.ai session list); the model never sees it.
   // Two flags: `hasExplicitTitle` (initialName or /rename — never auto-
   // overwrite) vs. `hasTitle` (any title, including auto-derived — blocks
   // the count-1 re-derivation but not count-3). The onUserMessage callback
   // (wired to both v1 and v2 below) derives from the 1st prompt and again
   // from the 3rd so mobile/web show a title that reflects more context.
   // The slug fallback (e.g. "remote-control-graceful-unicorn") makes
-  // auto-started sessions distinguishable in the claude.ai list before the
+  // auto-started sessions distinguishable in the pua.ai list before the
   // first prompt.
   let title = `remote-control-${generateShortWordSlug()}`
   let hasTitle = false
@@ -401,7 +401,7 @@ export async function initReplBridge(
   // on env-based.
   //
   // NAMING: "env-less" is distinct from "CCR v2" (the /worker/* transport).
-  // The env-based path below can ALSO use CCR v2 via CLAUDE_CODE_USE_CCR_V2.
+  // The env-based path below can ALSO use CCR v2 via PUA_CODE_USE_CCR_V2.
   // tengu_bridge_repl_v2 gates env-less (no poll loop), not transport version.
   //
   // perpetual (assistant-mode session continuity via bridge-pointer.json) is
@@ -415,7 +415,7 @@ export async function initReplBridge(
         `[bridge:repl] Skipping: ${versionError}`,
         true,
       )
-      onStateChange?.('failed', 'run `claude update` to upgrade')
+      onStateChange?.('failed', 'run `pua update` to upgrade')
       return null
     }
     logForDebugging(
@@ -456,7 +456,7 @@ export async function initReplBridge(
   const versionError = checkBridgeMinVersion()
   if (versionError) {
     logBridgeSkip('version_too_old', `[bridge:repl] Skipping: ${versionError}`)
-    onStateChange?.('failed', 'run `claude update` to upgrade')
+    onStateChange?.('failed', 'run `pua update` to upgrade')
     return null
   }
 
@@ -466,21 +466,21 @@ export async function initReplBridge(
   const gitRepoUrl = await getRemoteUrl()
   const sessionIngressUrl =
     process.env.USER_TYPE === 'ant' &&
-    process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
-      ? process.env.CLAUDE_BRIDGE_SESSION_INGRESS_URL
+    process.env.PUA_BRIDGE_SESSION_INGRESS_URL
+      ? process.env.PUA_BRIDGE_SESSION_INGRESS_URL
       : baseUrl
 
   // Assistant-mode sessions advertise a distinct worker_type so the web UI
   // can filter them into a dedicated picker. KAIROS guard keeps the
   // assistant module out of external builds entirely.
-  let workerType: BridgeWorkerType = 'claude_code'
+  let workerType: BridgeWorkerType = 'pua_code'
   if (feature('KAIROS')) {
     /* eslint-disable @typescript-eslint/no-require-imports */
     const { isAssistantMode } =
       require('../assistant/index.js') as typeof import('../assistant/index.js')
     /* eslint-enable @typescript-eslint/no-require-imports */
     if (isAssistantMode()) {
-      workerType = 'claude_code_assistant'
+      workerType = 'pua_code_assistant'
     }
   }
 
@@ -560,7 +560,7 @@ function deriveTitle(raw: string): string | undefined {
   // First sentence is usually the intent; rest is often context/detail.
   // Capture group instead of lookbehind — keeps YARR JIT happy.
   const firstSentence = /^(.*?[.!?])\s/.exec(clean)?.[1] ?? clean
-  // Collapse newlines/tabs — titles are single-line in the claude.ai list.
+  // Collapse newlines/tabs — titles are single-line in the pua.ai list.
   const flat = firstSentence.replace(/\s+/g, ' ').trim()
   if (!flat) return undefined
   return flat.length > TITLE_MAX_LEN

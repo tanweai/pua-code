@@ -4,7 +4,7 @@ import { open } from 'fs/promises'
 import { join } from 'path'
 import type { ModelUsage } from '../entrypoints/agentSdkTypes.js'
 import { logForDebugging } from './debug.js'
-import { getClaudeConfigHomeDir } from './envUtils.js'
+import { getPUAConfigHomeDir } from './envUtils.js'
 import { errorMessage } from './errors.js'
 import { getFsImplementation } from './fsOperations.js'
 import { logError } from './log.js'
@@ -75,7 +75,7 @@ export type PersistedStatsCache = {
 }
 
 export function getStatsCachePath(): string {
-  return join(getClaudeConfigHomeDir(), STATS_CACHE_FILENAME)
+  return join(getPUAConfigHomeDir(), STATS_CACHE_FILENAME)
 }
 
 function getEmptyCache(): PersistedStatsCache {
@@ -165,7 +165,7 @@ export async function loadStatsCache(): Promise<PersistedStatsCache> {
         `Migrated stats cache from v${parsed.version} to v${STATS_CACHE_VERSION}`,
       )
       // Persist migration so we don't re-migrate on every load.
-      // aggregateClaudeCodeStats() skips its save when lastComputedDate is
+      // aggregatePUACodeStats() skips its save when lastComputedDate is
       // already current, so without this the on-disk file stays at the old
       // version indefinitely.
       await saveStatsCache(migrated)
@@ -220,7 +220,7 @@ export async function saveStatsCache(
 
   try {
     // Ensure the directory exists
-    const configDir = getClaudeConfigHomeDir()
+    const configDir = getPUAConfigHomeDir()
     try {
       await fs.mkdir(configDir)
     } catch {

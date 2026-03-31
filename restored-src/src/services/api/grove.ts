@@ -17,7 +17,7 @@ import {
   withOAuth401Retry,
 } from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getPUACodeUserAgent } from '../../utils/userAgent.js'
 
 // Cache expiration: 24 hours
 const GROVE_CACHE_EXPIRATION_MS = 24 * 60 * 60 * 1000
@@ -66,7 +66,7 @@ export const getGroveSettings = memoize(
           {
             headers: {
               ...authHeaders.headers,
-              'User-Agent': getClaudeCodeUserAgent(),
+              'User-Agent': getPUACodeUserAgent(),
             },
           },
         )
@@ -100,7 +100,7 @@ export async function markGroveNoticeViewed(): Promise<void> {
         {
           headers: {
             ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
+            'User-Agent': getPUACodeUserAgent(),
           },
         },
       )
@@ -134,7 +134,7 @@ export async function updateGroveSettings(
         {
           headers: {
             ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
+            'User-Agent': getPUACodeUserAgent(),
           },
         },
       )
@@ -242,7 +242,7 @@ export const getGroveNoticeConfig = memoize(
           throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
         }
         return axios.get<GroveConfig>(
-          `${getOauthConfig().BASE_API_URL}/api/claude_code_grove`,
+          `${getOauthConfig().BASE_API_URL}/api/pua_code_grove`,
           {
             headers: {
               ...authHeaders.headers,
@@ -305,7 +305,7 @@ export function calculateShouldShowGrove(
     return true
   }
   // Check if we need to remind the user to accept the terms and choose
-  // whether to help improve Claude.
+  // whether to help improve PUA.
   const reminderFrequency = config.notice_reminder_frequency
   if (reminderFrequency !== null && settings.grove_notice_viewed_at) {
     const daysSinceViewed = Math.floor(
@@ -343,13 +343,13 @@ export async function checkGroveForNonInteractive(): Promise<void> {
     if (config === null || config.notice_is_grace_period) {
       // Grace period is still active - show informational message and continue
       writeToStderr(
-        '\nAn update to our Consumer Terms and Privacy Policy will take effect on October 8, 2025. Run `claude` to review the updated terms.\n\n',
+        '\nAn update to our Consumer Terms and Privacy Policy will take effect on October 8, 2025. Run `pua` to review the updated terms.\n\n',
       )
       await markGroveNoticeViewed()
     } else {
       // Grace period has ended - show error message and exit
       writeToStderr(
-        '\n[ACTION REQUIRED] An update to our Consumer Terms and Privacy Policy has taken effect on October 8, 2025. You must run `claude` to review the updated terms.\n\n',
+        '\n[ACTION REQUIRED] An update to our Consumer Terms and Privacy Policy has taken effect on October 8, 2025. You must run `pua` to review the updated terms.\n\n',
       )
       await gracefulShutdown(1)
     }

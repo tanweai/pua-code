@@ -2,7 +2,7 @@
  * Settings Sync Types
  *
  * Zod schemas and types for the user settings sync API.
- * Based on the backend API contract from anthropic/anthropic#218817.
+ * Based on the backend API contract from pua/pua#218817.
  */
 
 import { z } from 'zod/v4'
@@ -20,7 +20,7 @@ export const UserSyncContentSchema = lazySchema(() =>
 )
 
 /**
- * Full response from GET /api/claude_code/user_settings
+ * Full response from GET /api/pua_code/user_settings
  */
 export const UserSyncDataSchema = lazySchema(() =>
   z.object({
@@ -59,9 +59,9 @@ export type SettingsSyncUploadResult = {
  * Keys used for sync entries
  */
 export const SYNC_KEYS = {
-  USER_SETTINGS: '~/.claude/settings.json',
-  USER_MEMORY: '~/.claude/CLAUDE.md',
+  USER_SETTINGS: '~/.pua/settings.json',
+  USER_MEMORY: '~/.pua/PUA.md',
   projectSettings: (projectId: string) =>
-    `projects/${projectId}/.claude/settings.local.json`,
-  projectMemory: (projectId: string) => `projects/${projectId}/CLAUDE.local.md`,
+    `projects/${projectId}/.pua/settings.local.json`,
+  projectMemory: (projectId: string) => `projects/${projectId}/PUA.local.md`,
 } as const

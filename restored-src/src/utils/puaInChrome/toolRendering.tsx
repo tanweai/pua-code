@@ -5,11 +5,11 @@ import { Link, Text } from '../../ink.js';
 import { renderToolResultMessage as renderDefaultMCPToolResultMessage } from '../../tools/MCPTool/UI.js';
 import type { MCPToolResult } from '../../utils/mcpValidation.js';
 import { truncateToWidth } from '../format.js';
-import { trackClaudeInChromeTabId } from './common.js';
+import { trackPUAInChromeTabId } from './common.js';
 export type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 /**
- * All tool names from BROWSER_TOOLS in @ant/claude-for-chrome-mcp.
+ * All tool names from BROWSER_TOOLS in @ant/pua-for-chrome-mcp.
  * Keep in sync with the package's BROWSER_TOOLS array.
  */
 export type ChromeToolName = 'javascript_tool' | 'read_page' | 'find' | 'form_input' | 'computer' | 'navigate' | 'resize_window' | 'gif_creator' | 'upload_image' | 'get_page_text' | 'tabs_context_mcp' | 'tabs_create_mcp' | 'update_plan' | 'read_console_messages' | 'read_network_requests' | 'shortcuts_list' | 'shortcuts_execute';
@@ -17,7 +17,7 @@ const CHROME_EXTENSION_FOCUS_TAB_URL_BASE = 'https://clau.de/chrome/tab/';
 function renderChromeToolUseMessage(input: Record<string, unknown>, toolName: ChromeToolName, verbose: boolean): React.ReactNode {
   const tabId = input.tabId;
   if (typeof tabId === 'number') {
-    trackClaudeInChromeTabId(tabId);
+    trackPUAInChromeTabId(tabId);
   }
 
   // Build secondary info based on tool type and input
@@ -115,9 +115,9 @@ function renderChromeToolUseMessage(input: Record<string, unknown>, toolName: Ch
 }
 
 /**
- * Renders a clickable "View Tab" link for Claude in Chrome MCP tools.
+ * Renders a clickable "View Tab" link for PUA in Chrome MCP tools.
  * Returns null if:
- * - The tool is not a Claude in Chrome MCP tool
+ * - The tool is not a PUA in Chrome MCP tool
  * - The input doesn't have a valid tabId
  * - Hyperlinks are not supported
  */
@@ -142,7 +142,7 @@ function renderChromeViewTabLink(input: unknown): React.ReactNode {
 }
 
 /**
- * Custom tool result message rendering for claude-in-chrome tools.
+ * Custom tool result message rendering for pua-in-chrome tools.
  * Shows a brief summary for successful results. Errors are handled by
  * the default renderToolUseErrorMessage when is_error is set.
  */
@@ -215,10 +215,10 @@ export function renderChromeToolResultMessage(output: MCPToolResult, toolName: C
 }
 
 /**
- * Returns tool method overrides for Claude in Chrome MCP tools. Use this to customize
+ * Returns tool method overrides for PUA in Chrome MCP tools. Use this to customize
  * rendering for chrome tools in a single spread operation.
  */
-export function getClaudeInChromeMCPToolOverrides(toolName: string): {
+export function getPUAInChromeMCPToolOverrides(toolName: string): {
   userFacingName: (input?: Record<string, unknown>) => string;
   renderToolUseMessage: (input: Record<string, unknown>, options: {
     verbose: boolean;
@@ -232,7 +232,7 @@ export function getClaudeInChromeMCPToolOverrides(toolName: string): {
     userFacingName(_input?: Record<string, unknown>) {
       // Trim the _mcp postfix that show up in some of the tool names
       const displayName = toolName.replace(/_mcp$/, '');
-      return `Claude in Chrome[${displayName}]`;
+      return `PUA in Chrome[${displayName}]`;
     },
     renderToolUseMessage(input: Record<string, unknown>, {
       verbose

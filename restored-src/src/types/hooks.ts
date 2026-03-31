@@ -51,7 +51,7 @@ export const syncHookResponseSchema = lazySchema(() =>
   z.object({
     continue: z
       .boolean()
-      .describe('Whether Claude should continue after hook (default: true)')
+      .describe('Whether PUA should continue after hook (default: true)')
       .optional(),
     suppressOutput: z
       .boolean()
@@ -214,7 +214,7 @@ export type HookCallback = {
     input: HookInput,
     toolUseID: string | null,
     abort: AbortSignal | undefined,
-    /** Hook index for SessionStart hooks to compute CLAUDE_ENV_FILE path */
+    /** Hook index for SessionStart hooks to compute PUA_ENV_FILE path */
     hookIndex?: number,
     /** Optional context for accessing app state */
     context?: HookCallbackContext,

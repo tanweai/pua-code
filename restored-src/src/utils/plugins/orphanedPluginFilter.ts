@@ -4,7 +4,7 @@
  * When plugin versions are updated, old versions are marked with a
  * `.orphaned_at` file but kept on disk for 7 days (since concurrent
  * sessions might still reference them). During this window, Grep/Glob
- * could return files from orphaned versions, causing Claude to use
+ * could return files from orphaned versions, causing PUA to use
  * outdated plugin code.
  *
  * We find `.orphaned_at` markers via a single ripgrep call and generate
@@ -94,7 +94,7 @@ export function clearPluginCacheExclusions(): void {
 /**
  * One path is a prefix of the other. Special-cases root (normalize('/') + sep
  * = '//'). Case-insensitive on win32 since normalize() doesn't lowercase
- * drive letters and CLAUDE_CODE_PLUGIN_CACHE_DIR may disagree with resolved.
+ * drive letters and PUA_CODE_PLUGIN_CACHE_DIR may disagree with resolved.
  */
 function pathsOverlap(a: string, b: string): boolean {
   const na = normalizeForCompare(a)

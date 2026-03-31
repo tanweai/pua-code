@@ -32,7 +32,7 @@ export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXComma
       void refreshPolicyLimits();
       // Clear user data cache BEFORE GrowthBook refresh so it picks up fresh credentials
       resetUserCache();
-      // Refresh GrowthBook after login to get updated feature flags (e.g., for claude.ai MCPs)
+      // Refresh GrowthBook after login to get updated feature flags (e.g., for pua.ai MCPs)
       refreshGrowthBookAfterAuthChange();
       // Clear any stale trusted device token from a previous account before
       // re-enrolling — prevents sending the old token on bridge calls while

@@ -203,10 +203,10 @@ export type ParsedPowerShellCommand = {
 // CAN_SPAWN_PARSE_SCRIPT() warms the JIT (run 23574701241 windows-shard-5:
 // attackVectors F1 hit 2×5s timeout → valid:false → 'ask' instead of 'deny').
 // Override via env for tests. Read inside parsePowerShellCommandImpl, not
-// top-level, per CLAUDE.md (globalSettings.env ordering).
+// top-level, per PUA.md (globalSettings.env ordering).
 const DEFAULT_PARSE_TIMEOUT_MS = 5_000
 function getParseTimeoutMs(): number {
-  const env = process.env.CLAUDE_CODE_PWSH_PARSE_TIMEOUT_MS
+  const env = process.env.PUA_CODE_PWSH_PARSE_TIMEOUT_MS
   if (env) {
     const parsed = parseInt(env, 10)
     if (!isNaN(parsed) && parsed > 0) return parsed

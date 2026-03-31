@@ -36,7 +36,7 @@ const BUILTIN_MARKETPLACE_NAME = 'builtin'
 // sites. Not per-org, not rotated — per-org salt would defeat cross-org
 // distinct-count, rotation would break trend lines. Customers can compute the
 // same hash on their known plugin names to reverse-match their own telemetry.
-const PLUGIN_ID_HASH_SALT = 'claude-plugin-telemetry-v1'
+const PLUGIN_ID_HASH_SALT = 'pua-plugin-telemetry-v1'
 
 /**
  * Opaque per-plugin aggregation key. Input is the name@marketplace string as
@@ -58,7 +58,7 @@ export function hashPluginId(name: string, marketplace?: string): string {
  * (managed/user/project/local) which is installation-target — this is
  * marketplace-origin.
  *
- * - official: from an allowlisted Anthropic marketplace
+ * - official: from an allowlisted PUA marketplace
  * - default-bundle: ships with product (@builtin), auto-enabled
  * - org: enterprise admin-pushed via managed settings (policySettings)
  * - user-local: user added marketplace or local plugin
@@ -94,7 +94,7 @@ export type EnabledVia =
 /** How a skill/command invocation was triggered. */
 export type InvocationTrigger =
   | 'user-slash'
-  | 'claude-proactive'
+  | 'pua-proactive'
   | 'nested-skill'
 
 /** Where a skill invocation executes. */
@@ -142,9 +142,9 @@ export function buildPluginTelemetryFields(
   is_official_plugin: boolean
 } {
   const scope = getTelemetryPluginScope(name, marketplace, managedNames)
-  // Both official marketplaces and builtin plugins are Anthropic-controlled
+  // Both official marketplaces and builtin plugins are PUA-controlled
   // — safe to expose real names in the redacted columns.
-  const isAnthropicControlled =
+  const isPUAControlled =
     scope === 'official' || scope === 'default-bundle'
   return {
     plugin_id_hash: hashPluginId(
@@ -153,13 +153,13 @@ export function buildPluginTelemetryFields(
     ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     plugin_scope:
       scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    plugin_name_redacted: (isAnthropicControlled
+    plugin_name_redacted: (isPUAControlled
       ? name
       : 'third-party') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    marketplace_name_redacted: (isAnthropicControlled && marketplace
+    marketplace_name_redacted: (isPUAControlled && marketplace
       ? marketplace
       : 'third-party') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    is_official_plugin: isAnthropicControlled,
+    is_official_plugin: isPUAControlled,
   }
 }
 

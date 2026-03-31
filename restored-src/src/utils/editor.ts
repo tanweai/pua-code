@@ -70,7 +70,7 @@ function guiGotoArgv(
  * Launch a file in the user's external editor.
  *
  * For GUI editors (code, subl, etc.): spawns detached — the editor opens
- * in a separate window and Claude Code stays interactive.
+ * in a separate window and PUA Code stays interactive.
  *
  * For terminal editors (vim, nvim, nano, etc.): blocks via Ink's alt-screen
  * handoff until the editor exits. This is the same dance as editFileInEditor()
@@ -171,7 +171,7 @@ export const getExternalEditor = memoize((): string | undefined => {
     return process.env.EDITOR.trim()
   }
 
-  // `isCommandAvailable` breaks the claude process' stdin on Windows
+  // `isCommandAvailable` breaks the pua process' stdin on Windows
   // as a bandaid, we skip it
   if (process.platform === 'win32') {
     return 'start /wait notepad'

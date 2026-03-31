@@ -1,8 +1,8 @@
 /**
- * Session Tracing for Claude Code using OpenTelemetry (BETA)
+ * Session Tracing for PUA Code using OpenTelemetry (BETA)
  *
  * This module provides a high-level API for creating and managing spans
- * to trace Claude Code workflows. Each user interaction creates a root
+ * to trace PUA Code workflows. Each user interaction creates a root
  * interaction span, which contains operation spans (LLM requests, tool calls, etc.).
  *
  * Requirements:
@@ -126,7 +126,7 @@ function ensureCleanupInterval(): void {
 export function isEnhancedTelemetryEnabled(): boolean {
   if (feature('ENHANCED_TELEMETRY_BETA')) {
     const env =
-      process.env.CLAUDE_CODE_ENHANCED_TELEMETRY_BETA ??
+      process.env.PUA_CODE_ENHANCED_TELEMETRY_BETA ??
       process.env.ENABLE_ENHANCED_TELEMETRY_BETA
     if (isEnvTruthy(env)) {
       return true
@@ -150,7 +150,7 @@ function isAnyTracingEnabled(): boolean {
 }
 
 function getTracer() {
-  return trace.getTracer('com.anthropic.claude_code.tracing', '1.0.0')
+  return trace.getTracer('com.pua.pua_code.tracing', '1.0.0')
 }
 
 function createSpanAttributes(
@@ -169,7 +169,7 @@ function createSpanAttributes(
 }
 
 /**
- * Start an interaction span. This wraps a user request -> Claude response cycle.
+ * Start an interaction span. This wraps a user request -> PUA response cycle.
  * This is now a root span that includes all session-level attributes.
  * Sets the interaction context for all subsequent operations.
  */
@@ -213,7 +213,7 @@ export function startInteractionSpan(userPrompt: string): Span {
     'interaction.sequence': interactionSequence,
   })
 
-  const span = tracer.startSpan('claude_code.interaction', {
+  const span = tracer.startSpan('pua_code.interaction', {
     attributes,
   })
 
@@ -316,7 +316,7 @@ export function startLLMRequestSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.llm_request', { attributes }, ctx)
+  const span = tracer.startSpan('pua_code.llm_request', { attributes }, ctx)
 
   // Add query_source (agent name) if provided
   if (newContext?.querySource) {
@@ -502,7 +502,7 @@ export function startToolSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.tool', { attributes }, ctx)
+  const span = tracer.startSpan('pua_code.tool', { attributes }, ctx)
 
   // Add experimental tool input attributes
   if (toolInput) {
@@ -556,7 +556,7 @@ export function startToolBlockedOnUserSpan(): Span {
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
   const span = tracer.startSpan(
-    'claude_code.tool.blocked_on_user',
+    'pua_code.tool.blocked_on_user',
     { attributes },
     ctx,
   )
@@ -637,7 +637,7 @@ export function startToolExecutionSpan(): Span {
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
   const span = tracer.startSpan(
-    'claude_code.tool.execution',
+    'pua_code.tool.execution',
     { attributes },
     ctx,
   )
@@ -864,7 +864,7 @@ export function startHookSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.hook', { attributes }, ctx)
+  const span = tracer.startSpan('pua_code.hook', { attributes }, ctx)
 
   const spanId = getSpanId(span)
   const spanContextObj: SpanContext = {

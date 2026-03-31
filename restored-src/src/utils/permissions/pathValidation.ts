@@ -92,11 +92,11 @@ export function expandTilde(path: string): string {
  * Checks if a resolved path is writable according to the sandbox write allowlist.
  * When the sandbox is enabled, the user has explicitly configured which directories
  * are writable. We treat these as additional allowed write directories for path
- * validation purposes, so commands like `echo foo > /tmp/claude/x.txt` don't
- * prompt for permission when /tmp/claude/ is already in the sandbox allowlist.
+ * validation purposes, so commands like `echo foo > /tmp/pua/x.txt` don't
+ * prompt for permission when /tmp/pua/ is already in the sandbox allowlist.
  *
  * Respects the deny-within-allow list: paths in denyWithinAllow (like
- * .claude/settings.json) are still blocked even if their parent is in allowOnly.
+ * .pua/settings.json) are still blocked even if their parent is in allowOnly.
  */
 export function isPathInSandboxWriteAllowlist(resolvedPath: string): boolean {
   if (!SandboxManager.isSandboxingEnabled()) {
@@ -162,8 +162,8 @@ export function isPathAllowed(
   }
 
   // 2. For write/create operations, check internal editable paths (plan files, scratchpad, agent memory, job dirs)
-  // This MUST come before checkPathSafetyForAutoEdit since .claude is a dangerous directory
-  // and internal editable paths live under ~/.claude/ — matching the ordering in
+  // This MUST come before checkPathSafetyForAutoEdit since .pua is a dangerous directory
+  // and internal editable paths live under ~/.pua/ — matching the ordering in
   // checkWritePermissionForTool (filesystem.ts step 1.5)
   if (operationType !== 'read') {
     const internalEditResult = checkEditableInternalPath(resolvedPath, {})
@@ -177,7 +177,7 @@ export function isPathAllowed(
 
   // 2.5. For write/create operations, check comprehensive safety validations
   // This MUST come before checking working directory to prevent bypass via acceptEdits mode
-  // Checks: Windows patterns, Claude config files, dangerous files (on original + symlink paths)
+  // Checks: Windows patterns, PUA config files, dangerous files (on original + symlink paths)
   if (operationType !== 'read') {
     const safetyCheck = checkPathSafetyForAutoEdit(
       resolvedPath,
@@ -224,7 +224,7 @@ export function isPathAllowed(
 
   // 3.7. For write/create operations to paths OUTSIDE the working directory,
   // check the sandbox write allowlist. When the sandbox is enabled, users
-  // have explicitly configured writable directories (e.g. /tmp/claude/) —
+  // have explicitly configured writable directories (e.g. /tmp/pua/) —
   // treat these as additional allowed write directories so redirects/touch/
   // mkdir don't prompt unnecessarily. Safety checks (step 2) already ran.
   // Paths IN the working directory are intentionally excluded: the sandbox

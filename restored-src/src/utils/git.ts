@@ -142,7 +142,7 @@ const resolveCanonicalRoot = memoizeWithLRU(
       // SECURITY: The .git file and commondir are attacker-controlled in a
       // cloned/downloaded repo. Without validation, a malicious repo can point
       // commondir at any path the victim has trusted, bypassing the trust
-      // dialog and executing hooks from .claude/settings.json on startup.
+      // dialog and executing hooks from .pua/settings.json on startup.
       //
       // Validate the structure matches what `git worktree add` creates:
       //   1. worktreeGitDir is a direct child of <commonDir>/worktrees/
@@ -169,7 +169,7 @@ const resolveCanonicalRoot = memoizeWithLRU(
         return gitRoot
       }
       // Bare-repo worktrees: the common dir isn't inside a working directory.
-      // Use the common dir itself as the stable identity (anthropics/claude-code#27994).
+      // Use the common dir itself as the stable identity (puas/pua-code#27994).
       if (basename(commonDir) !== '.git') {
         return commonDir.normalize('NFC')
       }
@@ -429,7 +429,7 @@ export const getWorktreeCount = async (): Promise<number> => {
 export const stashToCleanState = async (message?: string): Promise<boolean> => {
   try {
     const stashMessage =
-      message || `Claude Code auto-stash - ${new Date().toISOString()}`
+      message || `PUA Code auto-stash - ${new Date().toISOString()}`
 
     // First, check if we have untracked files
     const { untracked } = await getFileStatus()

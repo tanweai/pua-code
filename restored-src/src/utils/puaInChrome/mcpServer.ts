@@ -1,9 +1,9 @@
 import {
-  type ClaudeForChromeContext,
-  createClaudeForChromeMcpServer,
+  type PUAForChromeContext,
+  createPUAForChromeMcpServer,
   type Logger,
   type PermissionMode,
-} from '@ant/claude-for-chrome-mcp'
+} from '@ant/pua-for-chrome-mcp'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { format } from 'util'
 import { shutdownDatadog } from '../../services/analytics/datadog.js'
@@ -14,16 +14,16 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import { initializeAnalyticsSink } from '../../services/analytics/sink.js'
-import { getClaudeAIOAuthTokens } from '../auth.js'
+import { getPUAAIOAuthTokens } from '../auth.js'
 import { enableConfigs, getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import { isEnvTruthy } from '../envUtils.js'
 import { sideQuery } from '../sideQuery.js'
 import { getAllSocketPaths, getSecureSocketPath } from './common.js'
 
-const EXTENSION_DOWNLOAD_URL = 'https://claude.ai/chrome'
+const EXTENSION_DOWNLOAD_URL = 'https://pua.ai/chrome'
 const BUG_REPORT_URL =
-  'https://github.com/anthropics/claude-code/issues/new?labels=bug,claude-in-chrome'
+  'https://github.com/puas/pua-code/issues/new?labels=bug,pua-in-chrome'
 
 // String metadata keys safe to forward to analytics. Keys like error_message
 // are excluded because they could contain page content or user data.
@@ -65,10 +65,10 @@ function getChromeBridgeUrl(): string | undefined {
   }
 
   if (isEnvTruthy(process.env.USE_STAGING_OAUTH)) {
-    return 'wss://bridge-staging.claudeusercontent.com'
+    return 'wss://bridge-staging.puausercontent.com'
   }
 
-  return 'wss://bridge.claudeusercontent.com'
+  return 'wss://bridge.puausercontent.com'
 }
 
 function isLocalBridge(): boolean {
@@ -79,41 +79,41 @@ function isLocalBridge(): boolean {
 }
 
 /**
- * Build the ClaudeForChromeContext used by both the subprocess MCP server
+ * Build the PUAForChromeContext used by both the subprocess MCP server
  * and the in-process path in the MCP client.
  */
 export function createChromeContext(
   env?: Record<string, string>,
-): ClaudeForChromeContext {
+): PUAForChromeContext {
   const logger = new DebugLogger()
   const chromeBridgeUrl = getChromeBridgeUrl()
   logger.info(`Bridge URL: ${chromeBridgeUrl ?? 'none (using native socket)'}`)
   const rawPermissionMode =
-    env?.CLAUDE_CHROME_PERMISSION_MODE ??
-    process.env.CLAUDE_CHROME_PERMISSION_MODE
+    env?.PUA_CHROME_PERMISSION_MODE ??
+    process.env.PUA_CHROME_PERMISSION_MODE
   let initialPermissionMode: PermissionMode | undefined
   if (rawPermissionMode) {
     if (isPermissionMode(rawPermissionMode)) {
       initialPermissionMode = rawPermissionMode
     } else {
       logger.warn(
-        `Invalid CLAUDE_CHROME_PERMISSION_MODE "${rawPermissionMode}". Valid values: ${PERMISSION_MODES.join(', ')}`,
+        `Invalid PUA_CHROME_PERMISSION_MODE "${rawPermissionMode}". Valid values: ${PERMISSION_MODES.join(', ')}`,
       )
     }
   }
   return {
-    serverName: 'Claude in Chrome',
+    serverName: 'PUA in Chrome',
     logger,
     socketPath: getSecureSocketPath(),
     getSocketPaths: getAllSocketPaths,
-    clientTypeId: 'claude-code',
+    clientTypeId: 'pua-code',
     onAuthenticationError: () => {
       logger.warn(
-        'Authentication error occurred. Please ensure you are logged into the Claude browser extension with the same claude.ai account as Claude Code.',
+        'Authentication error occurred. Please ensure you are logged into the PUA browser extension with the same pua.ai account as PUA Code.',
       )
     },
     onToolCallDisconnected: () => {
-      return `Browser extension is not connected. Please ensure the Claude browser extension is installed and running (${EXTENSION_DOWNLOAD_URL}), and that you are logged into claude.ai with the same account as Claude Code. If this is your first time connecting to Chrome, you may need to restart Chrome for the installation to take effect. If you continue to experience issues, please report a bug: ${BUG_REPORT_URL}`
+      return `Browser extension is not connected. Please ensure the PUA browser extension is installed and running (${EXTENSION_DOWNLOAD_URL}), and that you are logged into pua.ai with the same account as PUA Code. If this is your first time connecting to Chrome, you may need to restart Chrome for the installation to take effect. If you continue to experience issues, please report a bug: ${BUG_REPORT_URL}`
     },
     onExtensionPaired: (deviceId: string, name: string) => {
       saveGlobalConfig(config => {
@@ -143,7 +143,7 @@ export function createChromeContext(
           return getGlobalConfig().oauthAccount?.accountUuid
         },
         getOAuthToken: async () => {
-          return getClaudeAIOAuthTokens()?.accessToken ?? ''
+          return getPUAAIOAuthTokens()?.accessToken ?? ''
         },
         ...(isLocalBridge() && { devUserId: 'dev_user_local' }),
       },
@@ -160,15 +160,15 @@ export function createChromeContext(
     // ListTools also filters browser_task + lightning_turn out, so external
     // users never see the tools advertised. Three independent gates.
     //
-    // Types inlined: AnthropicMessagesRequest/Response live in
-    // @ant/claude-for-chrome-mcp@0.4.0 which isn't published yet. CI installs
-    // 0.3.0. The callAnthropicMessages field is also 0.4.0-only, but spreading
-    // an extra property into ClaudeForChromeContext is fine against either
+    // Types inlined: PUAMessagesRequest/Response live in
+    // @ant/pua-for-chrome-mcp@0.4.0 which isn't published yet. CI installs
+    // 0.3.0. The callPUAMessages field is also 0.4.0-only, but spreading
+    // an extra property into PUAForChromeContext is fine against either
     // version — 0.3.0 sees an unknown field (allowed in spread), 0.4.0 sees a
     // structurally-matching one. Once 0.4.0 is published, this can switch to
     // the package's exported types and the dep can be bumped.
     ...(process.env.USER_TYPE === 'ant' && {
-      callAnthropicMessages: async (req: {
+      callPUAMessages: async (req: {
         model: string
         max_tokens: number
         system: string
@@ -245,12 +245,12 @@ export function createChromeContext(
   }
 }
 
-export async function runClaudeInChromeMcpServer(): Promise<void> {
+export async function runPUAInChromeMcpServer(): Promise<void> {
   enableConfigs()
   initializeAnalyticsSink()
   const context = createChromeContext()
 
-  const server = createClaudeForChromeMcpServer(context)
+  const server = createPUAForChromeMcpServer(context)
   const transport = new StdioServerTransport()
 
   // Exit when parent process dies (stdin pipe closes).
@@ -269,9 +269,9 @@ export async function runClaudeInChromeMcpServer(): Promise<void> {
   process.stdin.on('end', () => void shutdownAndExit())
   process.stdin.on('error', () => void shutdownAndExit())
 
-  logForDebugging('[Claude in Chrome] Starting MCP server')
+  logForDebugging('[PUA in Chrome] Starting MCP server')
   await server.connect(transport)
-  logForDebugging('[Claude in Chrome] MCP server started')
+  logForDebugging('[PUA in Chrome] MCP server started')
 }
 
 class DebugLogger implements Logger {

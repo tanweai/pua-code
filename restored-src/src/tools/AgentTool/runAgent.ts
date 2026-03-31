@@ -383,18 +383,18 @@ export async function* runAgent({
   ])
 
   // Read-only agents (Explore, Plan) don't act on commit/PR/lint rules from
-  // CLAUDE.md — the main agent has full context and interprets their output.
-  // Dropping claudeMd here saves ~5-15 Gtok/week across 34M+ Explore spawns.
+  // PUA.md — the main agent has full context and interprets their output.
+  // Dropping puaMd here saves ~5-15 Gtok/week across 34M+ Explore spawns.
   // Explicit override.userContext from callers is preserved untouched.
-  // Kill-switch defaults true; flip tengu_slim_subagent_claudemd=false to revert.
-  const shouldOmitClaudeMd =
-    agentDefinition.omitClaudeMd &&
+  // Kill-switch defaults true; flip tengu_slim_subagent_puamd=false to revert.
+  const shouldOmitPUAMd =
+    agentDefinition.omitPUAMd &&
     !override?.userContext &&
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_slim_subagent_claudemd', true)
-  const { claudeMd: _omittedClaudeMd, ...userContextNoClaudeMd } =
+    getFeatureValue_CACHED_MAY_BE_STALE('tengu_slim_subagent_puamd', true)
+  const { puaMd: _omittedPUAMd, ...userContextNoPUAMd } =
     baseUserContext
-  const resolvedUserContext = shouldOmitClaudeMd
-    ? userContextNoClaudeMd
+  const resolvedUserContext = shouldOmitPUAMd
+    ? userContextNoPUAMd
     : baseUserContext
 
   // Explore/Plan are read-only search agents — the parent-session-start

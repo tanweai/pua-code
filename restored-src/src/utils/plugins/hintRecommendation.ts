@@ -3,9 +3,9 @@
  *
  * Companion to lspRecommendation.ts: where LSP recommendations are triggered
  * by file edits, plugin hints are triggered by CLIs/SDKs emitting a
- * `<claude-code-hint />` tag to stderr (detected by the Bash/PowerShell tools).
+ * `<pua-code-hint />` tag to stderr (detected by the Bash/PowerShell tools).
  *
- * State persists in GlobalConfig.claudeCodeHints — a show-once record per
+ * State persists in GlobalConfig.puaCodeHints — a show-once record per
  * plugin and a disabled flag (user picked "don't show again"). Official-
  * marketplace filtering is hardcoded for v1.
  */
@@ -17,10 +17,10 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import {
-  type ClaudeCodeHint,
+  type PUACodeHint,
   hasShownHintThisSession,
   setPendingHint,
-} from '../claudeCodeHints.js'
+} from '../puaCodeHints.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import { isPluginInstalled } from './installedPluginsManager.js'
@@ -32,7 +32,7 @@ import {
 import { isPluginBlockedByPolicy } from './pluginPolicy.js'
 
 /**
- * Hard cap on `claudeCodeHints.plugin[]` — bounds config growth. Each shown
+ * Hard cap on `puaCodeHints.plugin[]` — bounds config growth. Each shown
  * plugin appends one slug; past this point we stop prompting (and stop
  * appending) rather than let the config grow without limit.
  */
@@ -62,11 +62,11 @@ export type PluginHintRecommendation = {
  * just to strip a stderr line. The async marketplace-cache check happens
  * later in resolvePluginHint (hook side).
  */
-export function maybeRecordPluginHint(hint: ClaudeCodeHint): void {
+export function maybeRecordPluginHint(hint: PUACodeHint): void {
   if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_lapis_finch', false)) return
   if (hasShownHintThisSession()) return
 
-  const state = getGlobalConfig().claudeCodeHints
+  const state = getGlobalConfig().puaCodeHints
   if (state?.disabled) return
 
   const shown = state?.plugin ?? []
@@ -101,7 +101,7 @@ export function _resetHintRecommendationForTesting(): void {
  * the plugin isn't in the marketplace cache — the hint is discarded.
  */
 export async function resolvePluginHint(
-  hint: ClaudeCodeHint,
+  hint: PUACodeHint,
 ): Promise<PluginHintRecommendation | null> {
   const pluginId = hint.value
   const { name, marketplace } = parsePluginIdentifier(pluginId)
@@ -140,12 +140,12 @@ export async function resolvePluginHint(
  */
 export function markHintPluginShown(pluginId: string): void {
   saveGlobalConfig(current => {
-    const existing = current.claudeCodeHints?.plugin ?? []
+    const existing = current.puaCodeHints?.plugin ?? []
     if (existing.includes(pluginId)) return current
     return {
       ...current,
-      claudeCodeHints: {
-        ...current.claudeCodeHints,
+      puaCodeHints: {
+        ...current.puaCodeHints,
         plugin: [...existing, pluginId],
       },
     }
@@ -155,10 +155,10 @@ export function markHintPluginShown(pluginId: string): void {
 /** Called when the user picks "don't show plugin installation hints again". */
 export function disableHintRecommendations(): void {
   saveGlobalConfig(current => {
-    if (current.claudeCodeHints?.disabled) return current
+    if (current.puaCodeHints?.disabled) return current
     return {
       ...current,
-      claudeCodeHints: { ...current.claudeCodeHints, disabled: true },
+      puaCodeHints: { ...current.puaCodeHints, disabled: true },
     }
   })
 }

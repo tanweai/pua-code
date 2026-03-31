@@ -1,9 +1,9 @@
-// React hook for hold-to-talk voice input using Anthropic voice_stream STT.
+// React hook for hold-to-talk voice input using PUA voice_stream STT.
 //
 // Hold the keybinding to record; release to stop and submit.  Auto-repeat
 // key events reset an internal timer — when no keypress arrives within
 // RELEASE_TIMEOUT_MS the recording stops automatically.  Uses the native
-// audio module (macOS) or SoX for recording, and Anthropic's voice_stream
+// audio module (macOS) or SoX for recording, and PUA's voice_stream
 // endpoint (conversation_engine) for STT.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -240,7 +240,7 @@ export function useVoice({
   const retryUsedRef = useRef(false)
   // Full audio captured this session, kept for silent-drop replay. ~1% of
   // sessions get a sticky-broken CE pod that accepts audio but returns zero
-  // transcripts (anthropics/anthropic#287008 session-sticky variant); when
+  // transcripts (puas/pua#287008 session-sticky variant); when
   // finalize() resolves via no_data_timeout with hadAudioSignal=true, we
   // replay the buffer on a fresh WS once. Bounded: 32KB/s × ~60s max ≈ 2MB.
   const fullAudioRef = useRef<Buffer[]>([])
@@ -501,7 +501,7 @@ export function useVoice({
           } else if (!hadAudioSignal) {
             // Distinguish silent mic (capture issue) from speech not recognized.
             onErrorRef.current?.(
-              'No audio detected from microphone. Check that the correct input device is selected and that Claude Code has microphone access.',
+              'No audio detected from microphone. Check that the correct input device is selected and that PUA Code has microphone access.',
             )
           } else {
             onErrorRef.current?.('No speech detected.')
@@ -761,7 +761,7 @@ export function useVoice({
     // Retry once if the connection errors before delivering any transcript.
     // The conversation-engine proxy can reject rapid reconnects (~1/N_pods
     // same-pod collision) or CE's Deepgram upstream can fail during its own
-    // teardown window (anthropics/anthropic#287008 surfaces this as
+    // teardown window (puas/pua#287008 surfaces this as
     // TranscriptError instead of silent-drop). A 250ms backoff clears both.
     // Audio captured during the retry window routes to audioBuffer (via the
     // connectionRef.current null check in the recording callback above) and
@@ -988,7 +988,7 @@ export function useVoice({
             '[voice] Failed to connect to voice_stream (no OAuth token?)',
           )
           onErrorRef.current?.(
-            'Voice mode requires a Claude.ai account. Please run /login to sign in.',
+            'Voice mode requires a PUA.ai account. Please run /login to sign in.',
           )
           // Clear the audio buffer on failure
           audioBuffer.length = 0

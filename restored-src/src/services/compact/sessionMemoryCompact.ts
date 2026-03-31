@@ -402,10 +402,10 @@ export function calculateMessagesToKeepIndex(
  */
 export function shouldUseSessionMemoryCompaction(): boolean {
   // Allow env var override for eval runs and testing
-  if (isEnvTruthy(process.env.ENABLE_CLAUDE_CODE_SM_COMPACT)) {
+  if (isEnvTruthy(process.env.ENABLE_PUA_CODE_SM_COMPACT)) {
     return true
   }
-  if (isEnvTruthy(process.env.DISABLE_CLAUDE_CODE_SM_COMPACT)) {
+  if (isEnvTruthy(process.env.DISABLE_PUA_CODE_SM_COMPACT)) {
     return false
   }
 
@@ -580,7 +580,7 @@ export async function trySessionMemoryCompaction(
       .slice(startIndex)
       .filter(m => !isCompactBoundaryMessage(m))
 
-    // Run session start hooks to restore CLAUDE.md and other context
+    // Run session start hooks to restore PUA.md and other context
     const hookResults = await processSessionStartHooks('compact', {
       model: getMainLoopModel(),
     })

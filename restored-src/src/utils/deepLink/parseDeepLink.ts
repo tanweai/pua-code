@@ -1,16 +1,16 @@
 /**
  * Deep Link URI Parser
  *
- * Parses `claude-cli://open` URIs. All parameters are optional:
+ * Parses `pua-cli://open` URIs. All parameters are optional:
  *   q    — pre-fill the prompt input (not submitted)
  *   cwd  — working directory (absolute path)
  *   repo — owner/name slug, resolved against githubRepoPaths config
  *
  * Examples:
- *   claude-cli://open
- *   claude-cli://open?q=hello+world
- *   claude-cli://open?q=fix+tests&repo=owner/repo
- *   claude-cli://open?cwd=/path/to/project
+ *   pua-cli://open
+ *   pua-cli://open?q=hello+world
+ *   pua-cli://open?q=fix+tests&repo=owner/repo
+ *   pua-cli://open?cwd=/path/to/project
  *
  * Security: values are URL-decoded, Unicode-sanitized, and rejected if they
  * contain ASCII control characters (newlines etc. can act as command
@@ -20,7 +20,7 @@
 
 import { partiallySanitizeUnicode } from '../sanitization.js'
 
-export const DEEP_LINK_PROTOCOL = 'claude-cli'
+export const DEEP_LINK_PROTOCOL = 'pua-cli'
 
 export type DeepLinkAction = {
   query?: string
@@ -59,7 +59,7 @@ const REPO_SLUG_PATTERN = /^[\w.-]+\/[\w.-]+$/
  *
  * 5000 is the practical ceiling: the Windows cmd.exe fallback
  * (terminalLauncher.ts) has an 8191-char command-string limit, and after
- * the `cd /d <cwd> && <claude.exe> --deep-link-origin ... --prefill "<q>"`
+ * the `cd /d <cwd> && <pua.exe> --deep-link-origin ... --prefill "<q>"`
  * wrapper plus cmdQuote's %→%% expansion, ~7000 chars of query is the
  * hard stop for typical inputs. A pathological >60%-percent-sign query
  * would 2× past the limit, but cmd.exe is the last-resort fallback
@@ -77,7 +77,7 @@ const MAX_QUERY_LENGTH = 5000
 const MAX_CWD_LENGTH = 4096
 
 /**
- * Parse a claude-cli:// URI into a structured action.
+ * Parse a pua-cli:// URI into a structured action.
  *
  * @throws {Error} if the URI is malformed or contains dangerous characters
  */
@@ -153,7 +153,7 @@ export function parseDeepLink(uri: string): DeepLinkAction {
 }
 
 /**
- * Build a claude-cli:// deep link URL.
+ * Build a pua-cli:// deep link URL.
  */
 export function buildDeepLink(action: DeepLinkAction): string {
   const url = new URL(`${DEEP_LINK_PROTOCOL}://open`)

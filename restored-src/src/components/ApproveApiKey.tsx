@@ -60,7 +60,7 @@ export function ApproveApiKey(t0) {
   }
   let t3;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t3 = <Text bold={true}>ANTHROPIC_API_KEY</Text>;
+    t3 = <Text bold={true}>PUA_API_KEY</Text>;
     $[5] = t3;
   } else {
     t3 = $[5];

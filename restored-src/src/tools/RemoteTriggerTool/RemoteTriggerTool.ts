@@ -8,7 +8,7 @@ import type { ToolUseContext } from '../../Tool.js'
 import { buildTool, type ToolDef } from '../../Tool.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
+  getPUAAIOAuthTokens,
 } from '../../utils/auth.js'
 import { lazySchema } from '../../utils/lazySchema.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
@@ -77,10 +77,10 @@ export const RemoteTriggerTool = buildTool({
   },
   async call(input: Input, context: ToolUseContext) {
     await checkAndRefreshOAuthTokenIfNeeded()
-    const accessToken = getClaudeAIOAuthTokens()?.accessToken
+    const accessToken = getPUAAIOAuthTokens()?.accessToken
     if (!accessToken) {
       throw new Error(
-        'Not authenticated with a claude.ai account. Run /login and try again.',
+        'Not authenticated with a pua.ai account. Run /login and try again.',
       )
     }
     const orgUUID = await getOrganizationUUID()
@@ -92,8 +92,8 @@ export const RemoteTriggerTool = buildTool({
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': TRIGGERS_BETA,
+      'pua-version': '2023-06-01',
+      'pua-beta': TRIGGERS_BETA,
       'x-organization-uuid': orgUUID,
     }
 

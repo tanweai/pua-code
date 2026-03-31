@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ContentBlockParam } from '@pua-ai/sdk/resources/index.mjs'
 import type { UUID } from 'crypto'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { CompactionResult } from '../services/compact/compact.js'
@@ -37,7 +37,7 @@ export type PromptCommand = {
   disableNonInteractive?: boolean
   // Hooks to register when this skill is invoked
   hooks?: HooksSettings
-  // Base directory for skill resources (used to set CLAUDE_PLUGIN_ROOT environment variable for skill hooks)
+  // Base directory for skill resources (used to set PUA_PLUGIN_ROOT environment variable for skill hooks)
   skillRoot?: string
   // Execution context: 'inline' (default) or 'fork' (run as sub-agent)
   // 'inline' = skill content expands into the current conversation
@@ -162,14 +162,14 @@ type LocalJSXCommand = {
  * Commands with `availability` are only shown if the user matches at least one
  * of the listed auth types. See meetsAvailabilityRequirement() in commands.ts.
  *
- * Example: `availability: ['claude-ai', 'console']` shows the command to
- * claude.ai subscribers and direct Console API key users (api.anthropic.com),
+ * Example: `availability: ['pua-ai', 'console']` shows the command to
+ * pua.ai subscribers and direct Console API key users (api.pua.com),
  * but hides it from Bedrock/Vertex/Foundry users and custom base URL users.
  */
 export type CommandAvailability =
-  // claude.ai OAuth subscriber (Pro/Max/Team/Enterprise via claude.ai)
-  | 'claude-ai'
-  // Console API key user (direct api.anthropic.com, not via claude.ai OAuth)
+  // pua.ai OAuth subscriber (Pro/Max/Team/Enterprise via pua.ai)
+  | 'pua-ai'
+  // Console API key user (direct api.pua.com, not via pua.ai OAuth)
   | 'console'
 
 export type CommandBase = {

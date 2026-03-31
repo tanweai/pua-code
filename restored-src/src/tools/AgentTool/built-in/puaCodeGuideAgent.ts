@@ -14,32 +14,32 @@ import type {
   BuiltInAgentDefinition,
 } from '../loadAgentsDir.js'
 
-const CLAUDE_CODE_DOCS_MAP_URL =
-  'https://code.claude.com/docs/en/claude_code_docs_map.md'
-const CDP_DOCS_MAP_URL = 'https://platform.claude.com/llms.txt'
+const PUA_CODE_DOCS_MAP_URL =
+  'https://code.pua.com/docs/en/pua_code_docs_map.md'
+const CDP_DOCS_MAP_URL = 'https://platform.pua.com/llms.txt'
 
-export const CLAUDE_CODE_GUIDE_AGENT_TYPE = 'claude-code-guide'
+export const PUA_CODE_GUIDE_AGENT_TYPE = 'pua-code-guide'
 
-function getClaudeCodeGuideBasePrompt(): string {
+function getPUACodeGuideBasePrompt(): string {
   // Ant-native builds alias find/grep to embedded bfs/ugrep and remove the
   // dedicated Glob/Grep tools, so point at find/grep instead.
   const localSearchHint = hasEmbeddedSearchTools()
     ? `${FILE_READ_TOOL_NAME}, \`find\`, and \`grep\``
     : `${FILE_READ_TOOL_NAME}, ${GLOB_TOOL_NAME}, and ${GREP_TOOL_NAME}`
 
-  return `You are the Claude guide agent. Your primary responsibility is helping users understand and use Claude Code, the Claude Agent SDK, and the Claude API (formerly the Anthropic API) effectively.
+  return `You are the PUA guide agent. Your primary responsibility is helping users understand and use PUA Code, the PUA Agent SDK, and the PUA API (formerly the PUA API) effectively.
 
 **Your expertise spans three domains:**
 
-1. **Claude Code** (the CLI tool): Installation, configuration, hooks, skills, MCP servers, keyboard shortcuts, IDE integrations, settings, and workflows.
+1. **PUA Code** (the CLI tool): Installation, configuration, hooks, skills, MCP servers, keyboard shortcuts, IDE integrations, settings, and workflows.
 
-2. **Claude Agent SDK**: A framework for building custom AI agents based on Claude Code technology. Available for Node.js/TypeScript and Python.
+2. **PUA Agent SDK**: A framework for building custom AI agents based on PUA Code technology. Available for Node.js/TypeScript and Python.
 
-3. **Claude API**: The Claude API (formerly known as the Anthropic API) for direct model interaction, tool use, and integrations.
+3. **PUA API**: The PUA API (formerly known as the PUA API) for direct model interaction, tool use, and integrations.
 
 **Documentation sources:**
 
-- **Claude Code docs** (${CLAUDE_CODE_DOCS_MAP_URL}): Fetch this for questions about the Claude Code CLI tool, including:
+- **PUA Code docs** (${PUA_CODE_DOCS_MAP_URL}): Fetch this for questions about the PUA Code CLI tool, including:
   - Installation, setup, and getting started
   - Hooks (pre/post command execution)
   - Custom skills
@@ -50,18 +50,18 @@ function getClaudeCodeGuideBasePrompt(): string {
   - Subagents and plugins
   - Sandboxing and security
 
-- **Claude Agent SDK docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about building agents with the SDK, including:
+- **PUA Agent SDK docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about building agents with the SDK, including:
   - SDK overview and getting started (Python and TypeScript)
   - Agent configuration + custom tools
   - Session management and permissions
   - MCP integration in agents
   - Hosting and deployment
   - Cost tracking and context management
-  Note: Agent SDK docs are part of the Claude API documentation at the same URL.
+  Note: Agent SDK docs are part of the PUA API documentation at the same URL.
 
-- **Claude API docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about the Claude API (formerly the Anthropic API), including:
+- **PUA API docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about the PUA API (formerly the PUA API), including:
   - Messages API and streaming
-  - Tool use (function calling) and Anthropic-defined tools (computer use, code execution, web search, text editor, bash, programmatic tool calling, tool search tool, context editing, Files API, structured outputs)
+  - Tool use (function calling) and PUA-defined tools (computer use, code execution, web search, text editor, bash, programmatic tool calling, tool search tool, context editing, Files API, structured outputs)
   - Vision, PDF support, and citations
   - Extended thinking and structured outputs
   - MCP connector for remote MCP servers
@@ -74,7 +74,7 @@ function getClaudeCodeGuideBasePrompt(): string {
 4. Fetch the specific documentation pages
 5. Provide clear, actionable guidance based on official documentation
 6. Use ${WEB_SEARCH_TOOL_NAME} if docs don't cover the topic
-7. Reference local project files (CLAUDE.md, .claude/ directory) when relevant using ${localSearchHint}
+7. Reference local project files (PUA.md, .pua/ directory) when relevant using ${localSearchHint}
 
 **Guidelines:**
 - Always prioritize official documentation over assumptions
@@ -95,9 +95,9 @@ function getFeedbackGuideline(): string {
   return "- When you cannot find an answer or the feature doesn't exist, direct the user to use /feedback to report a feature request or bug"
 }
 
-export const CLAUDE_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
-  agentType: CLAUDE_CODE_GUIDE_AGENT_TYPE,
-  whenToUse: `Use this agent when the user asks questions ("Can Claude...", "Does Claude...", "How do I...") about: (1) Claude Code (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) Claude Agent SDK - building custom agents; (3) Claude API (formerly Anthropic API) - API usage, tool use, Anthropic SDK usage. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed claude-code-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
+export const PUA_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
+  agentType: PUA_CODE_GUIDE_AGENT_TYPE,
+  whenToUse: `Use this agent when the user asks questions ("Can PUA...", "Does PUA...", "How do I...") about: (1) PUA Code (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) PUA Agent SDK - building custom agents; (3) PUA API (formerly PUA API) - API usage, tool use, PUA SDK usage. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed pua-code-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
   // Ant-native builds: Glob/Grep tools are removed; use Bash (with embedded
   // bfs/ugrep via find/grep aliases) for local file search instead.
   tools: hasEmbeddedSearchTools()
@@ -135,7 +135,7 @@ export const CLAUDE_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
       )
     }
 
-    // 2. Custom agents from .claude/agents/
+    // 2. Custom agents from .pua/agents/
     const customAgents =
       toolUseContext.options.agentDefinitions.activeAgents.filter(
         (a: AgentDefinition) => a.source !== 'built-in',
@@ -181,7 +181,7 @@ export const CLAUDE_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
 
     // Add the feedback guideline (conditional based on whether user is using 3P services)
     const feedbackGuideline = getFeedbackGuideline()
-    const basePromptWithFeedback = `${getClaudeCodeGuideBasePrompt()}
+    const basePromptWithFeedback = `${getPUACodeGuideBasePrompt()}
 ${feedbackGuideline}`
 
     // If we have any context to add, append it to the base system prompt

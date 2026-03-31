@@ -55,7 +55,7 @@ export async function logOTelEvent(
   // Workspace directory from the desktop app (host path). Events only —
   // filesystem paths are too high-cardinality for metric dimensions, and
   // the BQ metrics pipeline must never see them.
-  const workspaceDir = process.env.CLAUDE_CODE_WORKSPACE_HOST_PATHS
+  const workspaceDir = process.env.PUA_CODE_WORKSPACE_HOST_PATHS
   if (workspaceDir) {
     attributes['workspace.host_paths'] = workspaceDir.split('|')
   }
@@ -69,7 +69,7 @@ export async function logOTelEvent(
 
   // Emit log record as an event
   eventLogger.emit({
-    body: `claude_code.${eventName}`,
+    body: `pua_code.${eventName}`,
     attributes,
   })
 }

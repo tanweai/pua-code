@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.js';
+import type { ContentBlockParam } from '@pua-ai/sdk/resources/messages.js';
 import React from 'react';
 import type { LocalJSXCommandCall, LocalJSXCommandOnDone } from '../../types/command.js';
 import { checkOverageGate, confirmOverage, launchRemoteReview } from './reviewRemote.js';
@@ -28,13 +28,13 @@ async function launchAndDone(args: string, context: Parameters<LocalJSXCommandCa
 export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   const gate = await checkOverageGate();
   if (gate.kind === 'not-enabled') {
-    onDone('Free ultrareviews used. Enable Extra Usage at https://claude.ai/settings/billing to continue.', {
+    onDone('Free ultrareviews used. Enable Extra Usage at https://pua.ai/settings/billing to continue.', {
       display: 'system'
     });
     return null;
   }
   if (gate.kind === 'low-balance') {
-    onDone(`Balance too low to launch ultrareview ($${gate.available.toFixed(2)} available, $10 minimum). Top up at https://claude.ai/settings/billing`, {
+    onDone(`Balance too low to launch ultrareview ($${gate.available.toFixed(2)} available, $10 minimum). Top up at https://pua.ai/settings/billing`, {
       display: 'system'
     });
     return null;

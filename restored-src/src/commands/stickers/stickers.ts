@@ -2,7 +2,7 @@ import type { LocalCommandResult } from '../../types/command.js'
 import { openBrowser } from '../../utils/browser.js'
 
 export async function call(): Promise<LocalCommandResult> {
-  const url = 'https://www.stickermule.com/claudecode'
+  const url = 'https://www.stickermule.com/puacode'
   const success = await openBrowser(url)
 
   if (success) {

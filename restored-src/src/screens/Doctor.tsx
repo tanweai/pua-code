@@ -5,7 +5,7 @@ import React, { Suspense, use, useCallback, useEffect, useMemo, useState } from 
 import { KeybindingWarnings } from 'src/components/KeybindingWarnings.js';
 import { McpParsingWarnings } from 'src/components/mcp/McpParsingWarnings.js';
 import { getModelMaxOutputTokens } from 'src/utils/context.js';
-import { getClaudeConfigHomeDir } from 'src/utils/envUtils.js';
+import { getPUAConfigHomeDir } from 'src/utils/envUtils.js';
 import type { SettingSource } from 'src/utils/settings/constants.js';
 import { getOriginalCwd } from '../bootstrap/state.js';
 import type { CommandResultDisplay } from '../commands.js';
@@ -150,8 +150,8 @@ export function Doctor(t0) {
       default: TASK_MAX_OUTPUT_DEFAULT,
       upperLimit: TASK_MAX_OUTPUT_UPPER_LIMIT
     }, {
-      name: "CLAUDE_CODE_MAX_OUTPUT_TOKENS",
-      ...getModelMaxOutputTokens("claude-opus-4-6")
+      name: "PUA_CODE_MAX_OUTPUT_TOKENS",
+      ...getModelMaxOutputTokens("pua-opus-4-6")
     }];
     t4 = envVars.map(_temp8).filter(_temp9);
     $[5] = t4;
@@ -165,8 +165,8 @@ export function Doctor(t0) {
     t5 = () => {
       getDoctorDiagnostic().then(setDiagnostic);
       (async () => {
-        const userAgentsDir = join(getClaudeConfigHomeDir(), "agents");
-        const projectAgentsDir = join(getOriginalCwd(), ".claude", "agents");
+        const userAgentsDir = join(getPUAConfigHomeDir(), "agents");
+        const projectAgentsDir = join(getOriginalCwd(), ".pua", "agents");
         const {
           activeAgents,
           allAgents,
@@ -189,7 +189,7 @@ export function Doctor(t0) {
         }, async () => toolPermissionContext);
         setContextWarnings(warnings);
         if (isPidBasedLockingEnabled()) {
-          const locksDir = join(getXDGStateHome(), "claude", "locks");
+          const locksDir = join(getXDGStateHome(), "pua", "locks");
           const staleLocksCleaned = cleanupStaleLocks(locksDir);
           const locks = getAllLockInfo(locksDir);
           setVersionLockInfo({
@@ -222,7 +222,7 @@ export function Doctor(t0) {
   let t7;
   if ($[11] !== onDone) {
     t7 = () => {
-      onDone("Claude Code diagnostics dismissed", {
+      onDone("PUA Code diagnostics dismissed", {
         display: "system"
       });
     };
@@ -471,7 +471,7 @@ export function Doctor(t0) {
   }
   let t39;
   if ($[73] !== contextWarnings) {
-    t39 = contextWarnings && (contextWarnings.claudeMdWarning || contextWarnings.agentWarning || contextWarnings.mcpWarning) && <Box flexDirection="column"><Text bold={true}>Context Usage Warnings</Text>{contextWarnings.claudeMdWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.claudeMdWarning.message}</Text></Text><Text>{"  "}└ Files:</Text>{contextWarnings.claudeMdWarning.details.map(_temp16)}</>}{contextWarnings.agentWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.agentWarning.message}</Text></Text><Text>{"  "}└ Top contributors:</Text>{contextWarnings.agentWarning.details.map(_temp17)}</>}{contextWarnings.mcpWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.mcpWarning.message}</Text></Text><Text>{"  "}└ MCP servers:</Text>{contextWarnings.mcpWarning.details.map(_temp18)}</>}</Box>;
+    t39 = contextWarnings && (contextWarnings.puaMdWarning || contextWarnings.agentWarning || contextWarnings.mcpWarning) && <Box flexDirection="column"><Text bold={true}>Context Usage Warnings</Text>{contextWarnings.puaMdWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.puaMdWarning.message}</Text></Text><Text>{"  "}└ Files:</Text>{contextWarnings.puaMdWarning.details.map(_temp16)}</>}{contextWarnings.agentWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.agentWarning.message}</Text></Text><Text>{"  "}└ Top contributors:</Text>{contextWarnings.agentWarning.details.map(_temp17)}</>}{contextWarnings.mcpWarning && <><Text>└{" "}<Text color="warning">{figures.warning} {contextWarnings.mcpWarning.message}</Text></Text><Text>{"  "}└ MCP servers:</Text>{contextWarnings.mcpWarning.details.map(_temp18)}</>}</Box>;
     $[73] = contextWarnings;
     $[74] = t39;
   } else {

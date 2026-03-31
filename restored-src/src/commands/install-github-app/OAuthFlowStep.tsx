@@ -111,8 +111,8 @@ export function OAuthFlowStep({
         const timer_0 = setTimeout(setShowPastePrompt, 3000, true);
         timersRef.current.add(timer_0);
       }, {
-        loginWithClaudeAi: true,
-        // Always use Claude AI for subscription tokens
+        loginWithPUAAi: true,
+        // Always use PUA AI for subscription tokens
         inferenceOnly: true,
         expiresIn: 365 * 24 * 60 * 60 // 1 year
       });
@@ -207,7 +207,7 @@ export function OAuthFlowStep({
             {!showPastePrompt && <Box>
                 <Spinner />
                 <Text>
-                  Opening browser to sign in with your Claude account…
+                  Opening browser to sign in with your PUA account…
                 </Text>
               </Box>}
 

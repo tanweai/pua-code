@@ -46,7 +46,7 @@ export const TOOL_VALIDATION_CONFIG: ToolValidationConfig = {
           valid: false,
           error: 'WebSearch does not support wildcards',
           suggestion: 'Use exact search terms without * or ?',
-          examples: ['WebSearch(claude ai)', 'WebSearch(typescript tutorial)'],
+          examples: ['WebSearch(pua ai)', 'WebSearch(typescript tutorial)'],
         }
       }
       return { valid: true }

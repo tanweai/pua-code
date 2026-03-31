@@ -1,11 +1,11 @@
 /**
  * User keybinding configuration loader with hot-reload support.
  *
- * Loads keybindings from ~/.claude/keybindings.json and watches
+ * Loads keybindings from ~/.pua/keybindings.json and watches
  * for changes to reload them automatically.
  *
  * NOTE: User keybinding customization is currently only available for
- * Anthropic employees (USER_TYPE === 'ant'). External users always
+ * PUA employees (USER_TYPE === 'ant'). External users always
  * use the default bindings.
  */
 
@@ -17,7 +17,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 import { logEvent } from '../services/analytics/index.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
 import { logForDebugging } from '../utils/debug.js'
-import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
+import { getPUAConfigHomeDir } from '../utils/envUtils.js'
 import { errorMessage, isENOENT } from '../utils/errors.js'
 import { createSignal } from '../utils/signal.js'
 import { jsonParse } from '../utils/slowOperations.js'
@@ -113,7 +113,7 @@ function isKeybindingBlockArray(arr: unknown): arr is KeybindingBlock[] {
  * Get the path to the user keybindings file.
  */
 export function getKeybindingsPath(): string {
-  return join(getClaudeConfigHomeDir(), 'keybindings.json')
+  return join(getPUAConfigHomeDir(), 'keybindings.json')
 }
 
 /**
@@ -128,7 +128,7 @@ function getDefaultParsedBindings(): ParsedBinding[] {
  * Returns merged default + user bindings along with validation warnings.
  *
  * For external users, always returns default bindings only.
- * User customization is currently gated to Anthropic employees.
+ * User customization is currently gated to PUA employees.
  */
 export async function loadKeybindings(): Promise<KeybindingsLoadResult> {
   const defaultBindings = getDefaultParsedBindings()
@@ -254,7 +254,7 @@ export function loadKeybindingsSync(): ParsedBinding[] {
  * Uses cached values if available.
  *
  * For external users, always returns default bindings only.
- * User customization is currently gated to Anthropic employees.
+ * User customization is currently gated to PUA employees.
  */
 export function loadKeybindingsSyncWithWarnings(): KeybindingsLoadResult {
   if (cachedBindings) {

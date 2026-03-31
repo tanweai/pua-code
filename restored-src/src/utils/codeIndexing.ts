@@ -33,7 +33,7 @@ export type CodeIndexingTool =
   | 'amazon-q'
   | 'gemini'
   // MCP code indexing servers
-  | 'claude-context'
+  | 'pua-context'
   | 'code-index-mcp'
   | 'local-code-search'
   | 'autodev-codebase'
@@ -103,13 +103,13 @@ const MCP_SERVER_PATTERNS: Array<{
   { pattern: /^bloop$/i, tool: 'bloop' },
   { pattern: /^gitloop$/i, tool: 'gitloop' },
   // MCP code indexing servers
-  { pattern: /^claude[-_]?context$/i, tool: 'claude-context' },
+  { pattern: /^pua[-_]?context$/i, tool: 'pua-context' },
   { pattern: /^code[-_]?index[-_]?mcp$/i, tool: 'code-index-mcp' },
   { pattern: /^code[-_]?index$/i, tool: 'code-index-mcp' },
   { pattern: /^local[-_]?code[-_]?search$/i, tool: 'local-code-search' },
   { pattern: /^codebase$/i, tool: 'autodev-codebase' },
   { pattern: /^autodev[-_]?codebase$/i, tool: 'autodev-codebase' },
-  { pattern: /^code[-_]?context$/i, tool: 'claude-context' },
+  { pattern: /^code[-_]?context$/i, tool: 'pua-context' },
 ]
 
 /**

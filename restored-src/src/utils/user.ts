@@ -86,9 +86,9 @@ export const getCoreUserData = memoize(
     if (includeAnalyticsMetadata) {
       subscriptionType = getSubscriptionType() ?? undefined
       rateLimitTier = getRateLimitTier() ?? undefined
-      if (subscriptionType && config.claudeCodeFirstTokenDate) {
+      if (subscriptionType && config.puaCodeFirstTokenDate) {
         const configFirstTokenTime = new Date(
-          config.claudeCodeFirstTokenDate,
+          config.puaCodeFirstTokenDate,
         ).getTime()
         if (!isNaN(configFirstTokenTime)) {
           firstTokenTime = configFirstTokenTime
@@ -152,7 +152,7 @@ function getEmail(): string | undefined {
   }
 
   if (process.env.COO_CREATOR) {
-    return `${process.env.COO_CREATOR}@anthropic.com`
+    return `${process.env.COO_CREATOR}@pua.com`
   }
 
   // If initUser() wasn't called, we return undefined instead of blocking
@@ -172,7 +172,7 @@ async function getEmailAsync(): Promise<string | undefined> {
   }
 
   if (process.env.COO_CREATOR) {
-    return `${process.env.COO_CREATOR}@anthropic.com`
+    return `${process.env.COO_CREATOR}@pua.com`
   }
 
   return getGitEmail()

@@ -2,12 +2,12 @@
  * Built-in terminal panel toggled with Meta+J.
  *
  * Uses tmux for shell persistence: a separate tmux server with a per-instance
- * socket (e.g., "claude-panel-a1b2c3d4") holds the shell session. Each Claude
+ * socket (e.g., "pua-panel-a1b2c3d4") holds the shell session. Each PUA
  * Code instance gets its own isolated terminal panel that persists within the
  * session but is destroyed when the instance exits.
  *
  * Meta+J is bound to detach-client inside tmux, so pressing it returns to
- * Claude Code while the shell keeps running. Next toggle re-attaches to the
+ * PUA Code while the shell keeps running. Next toggle re-attaches to the
  * same session.
  *
  * When tmux is not available, falls back to a non-persistent shell via spawnSync.
@@ -26,13 +26,13 @@ const TMUX_SESSION = 'panel'
 
 /**
  * Get the tmux socket name for the terminal panel.
- * Uses a unique socket per Claude Code instance (based on session ID)
+ * Uses a unique socket per PUA Code instance (based on session ID)
  * so that each instance has its own isolated terminal panel.
  */
 export function getTerminalPanelSocket(): string {
   // Use first 8 chars of session UUID for uniqueness while keeping name short
   const sessionId = getSessionId()
-  return `claude-panel-${sessionId.slice(0, 8)}`
+  return `pua-panel-${sessionId.slice(0, 8)}`
 }
 
 let instance: TerminalPanel | undefined
@@ -109,7 +109,7 @@ class TerminalPanel {
       return false
     }
 
-    // Bind Meta+J (toggles back to Claude Code from inside the terminal)
+    // Bind Meta+J (toggles back to PUA Code from inside the terminal)
     // and configure the status bar hint. Chained with ';' to collapse
     // 5 spawnSync calls into 1.
     // biome-ignore format: one tmux command per line
@@ -118,7 +118,7 @@ class TerminalPanel {
       'bind-key', '-n', 'M-j', 'detach-client', ';',
       'set-option', '-g', 'status-style', 'bg=default', ';',
       'set-option', '-g', 'status-left', '', ';',
-      'set-option', '-g', 'status-right', ' Alt+J to return to Claude ', ';',
+      'set-option', '-g', 'status-right', ' Alt+J to return to PUA ', ';',
       'set-option', '-g', 'status-right-style', 'fg=brightblack',
     ])
 

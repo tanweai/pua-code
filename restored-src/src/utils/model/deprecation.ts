@@ -31,8 +31,8 @@ type DeprecationEntry = {
  * To add a new deprecated model, add an entry to this object.
  */
 const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
-  'claude-3-opus': {
-    modelName: 'Claude 3 Opus',
+  'pua-3-opus': {
+    modelName: 'PUA 3 Opus',
     retirementDates: {
       firstParty: 'January 5, 2026',
       bedrock: 'January 15, 2026',
@@ -40,8 +40,8 @@ const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
       foundry: 'January 5, 2026',
     },
   },
-  'claude-3-7-sonnet': {
-    modelName: 'Claude 3.7 Sonnet',
+  'pua-3-7-sonnet': {
+    modelName: 'PUA 3.7 Sonnet',
     retirementDates: {
       firstParty: 'February 19, 2026',
       bedrock: 'April 28, 2026',
@@ -49,8 +49,8 @@ const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
       foundry: 'February 19, 2026',
     },
   },
-  'claude-3-5-haiku': {
-    modelName: 'Claude 3.5 Haiku',
+  'pua-3-5-haiku': {
+    modelName: 'PUA 3.5 Haiku',
     retirementDates: {
       firstParty: 'February 19, 2026',
       bedrock: null,

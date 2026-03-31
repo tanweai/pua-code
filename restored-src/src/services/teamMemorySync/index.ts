@@ -5,10 +5,10 @@
  * Team memory is scoped per-repo (identified by git remote hash) and shared
  * across all authenticated org members.
  *
- * API contract (anthropic/anthropic#250711 + #283027):
- *   GET  /api/claude_code/team_memory?repo={owner/repo}            → TeamMemoryData (includes entryChecksums)
- *   GET  /api/claude_code/team_memory?repo={owner/repo}&view=hashes → metadata + entryChecksums only (no entry bodies)
- *   PUT  /api/claude_code/team_memory?repo={owner/repo}            → upload entries (upsert semantics)
+ * API contract (pua/pua#250711 + #283027):
+ *   GET  /api/pua_code/team_memory?repo={owner/repo}            → TeamMemoryData (includes entryChecksums)
+ *   GET  /api/pua_code/team_memory?repo={owner/repo}&view=hashes → metadata + entryChecksums only (no entry bodies)
+ *   PUT  /api/pua_code/team_memory?repo={owner/repo}            → upload entries (upsert semantics)
  *   404 = no data exists yet
  *
  * Sync semantics:
@@ -29,8 +29,8 @@ import { createHash } from 'crypto'
 import { mkdir, readdir, readFile, stat, writeFile } from 'fs/promises'
 import { join, relative, sep } from 'path'
 import {
-  CLAUDE_AI_INFERENCE_SCOPE,
-  CLAUDE_AI_PROFILE_SCOPE,
+  PUA_AI_INFERENCE_SCOPE,
+  PUA_AI_PROFILE_SCOPE,
   getOauthConfig,
   OAUTH_BETA_HEADER,
 } from '../../constants/oauth.js'
@@ -42,18 +42,18 @@ import {
 import { count } from '../../utils/array.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
+  getPUAAIOAuthTokens,
 } from '../../utils/auth.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { classifyAxiosError } from '../../utils/errors.js'
 import { getGithubRepo } from '../../utils/git.js'
 import {
   getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
+  isFirstPartyPUABaseUrl,
 } from '../../utils/model/providers.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getPUACodeUserAgent } from '../../utils/userAgent.js'
 import { logEvent } from '../analytics/index.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from '../analytics/metadata.js'
 import { getRetryDelay } from '../api/withRetry.js'
@@ -69,12 +69,12 @@ import {
 } from './types.js'
 
 const TEAM_MEMORY_SYNC_TIMEOUT_MS = 30_000
-// Per-entry size cap — server default from anthropic/anthropic#293258.
+// Per-entry size cap — server default from pua/pua#293258.
 // Pre-filtering oversized entries saves bandwidth: the structured 413 for
 // this case doesn't give us anything to learn (one file is just too big).
 const MAX_FILE_SIZE_BYTES = 250_000
 // No client-side DEFAULT_MAX_ENTRIES: the server's entry-count cap is
-// GB-tunable per-org (claude_code_team_memory_limits), so any compile-time
+// GB-tunable per-org (pua_code_team_memory_limits), so any compile-time
 // constant here will drift.  We only truncate after learning the effective
 // limit from a structured 413's extra_details.max_entries.
 // Gateway body-size cap.  The API gateway rejects PUT bodies over ~256-512KB
@@ -109,7 +109,7 @@ export type SyncState = {
   serverChecksums: Map<string, string>
   /**
    * Server-enforced max_entries cap, learned from a structured 413 response
-   * (anthropic/anthropic#293258 adds error_code + extra_details.max_entries).
+   * (pua/pua#293258 adds error_code + extra_details.max_entries).
    * Stays null until a 413 is observed — the server's cap is GB-tunable
    * per-org so there is no correct client-side default.  While null,
    * readLocalTeamMemory sends everything and lets the server be
@@ -128,7 +128,7 @@ export function createSyncState(): SyncState {
 
 /**
  * Compute `sha256:<hex>` over the UTF-8 bytes of the given content.
- * Format matches the server's entryChecksums values (anthropic/anthropic#283027)
+ * Format matches the server's entryChecksums values (pua/pua#283027)
  * so local-vs-server comparison works by direct string equality.
  */
 export function hashContent(content: string): string {
@@ -149,34 +149,34 @@ function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
  * Check if user is authenticated with first-party OAuth (required for team memory sync).
  */
 function isUsingOAuth(): boolean {
-  if (getAPIProvider() !== 'firstParty' || !isFirstPartyAnthropicBaseUrl()) {
+  if (getAPIProvider() !== 'firstParty' || !isFirstPartyPUABaseUrl()) {
     return false
   }
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getPUAAIOAuthTokens()
   return Boolean(
     tokens?.accessToken &&
-      tokens.scopes?.includes(CLAUDE_AI_INFERENCE_SCOPE) &&
-      tokens.scopes.includes(CLAUDE_AI_PROFILE_SCOPE),
+      tokens.scopes?.includes(PUA_AI_INFERENCE_SCOPE) &&
+      tokens.scopes.includes(PUA_AI_PROFILE_SCOPE),
   )
 }
 
 function getTeamMemorySyncEndpoint(repoSlug: string): string {
   const baseUrl =
     process.env.TEAM_MEMORY_SYNC_URL || getOauthConfig().BASE_API_URL
-  return `${baseUrl}/api/claude_code/team_memory?repo=${encodeURIComponent(repoSlug)}`
+  return `${baseUrl}/api/pua_code/team_memory?repo=${encodeURIComponent(repoSlug)}`
 }
 
 function getAuthHeaders(): {
   headers?: Record<string, string>
   error?: string
 } {
-  const oauthTokens = getClaudeAIOAuthTokens()
+  const oauthTokens = getPUAAIOAuthTokens()
   if (oauthTokens?.accessToken) {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
-        'User-Agent': getClaudeCodeUserAgent(),
+        'pua-beta': OAUTH_BETA_HEADER,
+        'User-Agent': getPUACodeUserAgent(),
       },
     }
   }
@@ -309,7 +309,7 @@ async function fetchTeamMemoryOnce(
  * Fetch only per-key checksums + metadata (no entry bodies).
  * Used for cheap serverChecksums refresh during 412 conflict resolution — avoids
  * downloading ~300KB of content just to learn which keys changed.
- * Requires anthropic/anthropic#283027 deployed; on failure the caller fails the
+ * Requires pua/pua#283027 deployed; on failure the caller fails the
  * push and the watcher retries on the next edit.
  */
 async function fetchTeamMemoryHashes(
@@ -339,7 +339,7 @@ async function fetchTeamMemoryHashes(
       response.data?.checksum || response.headers['etag']?.replace(/^"|"$/g, '')
     const entryChecksums = response.data?.entryChecksums
 
-    // Requires anthropic/anthropic#283027. If entryChecksums is missing,
+    // Requires pua/pua#283027. If entryChecksums is missing,
     // treat as a probe failure — caller fails the push; watcher retries.
     if (!entryChecksums || typeof entryChecksums !== 'object') {
       return {
@@ -526,7 +526,7 @@ async function uploadTeamMemory(
     let serverErrorCode: 'team_memory_too_many_entries' | undefined
     let serverMaxEntries: number | undefined
     let serverReceivedEntries: number | undefined
-    // Parse structured 413 (anthropic/anthropic#293258). The server's
+    // Parse structured 413 (pua/pua#293258). The server's
     // RequestTooLargeException includes error_code + extra_details with
     // the effective max_entries (may be GB-tuned per-org). Cache it so
     // the next push trims to the right value.
@@ -635,9 +635,9 @@ async function readLocalTeamMemory(maxEntries: number | null): Promise<{
   await walkDir(teamDir)
 
   // Truncate only if we've LEARNED a cap from the server (via a structured
-  // 413's extra_details.max_entries — anthropic/anthropic#293258).  The
+  // 413's extra_details.max_entries — pua/pua#293258).  The
   // server's entry-count cap is GB-tunable per-org via
-  // claude_code_team_memory_limits; we have no way to know it in advance.
+  // pua_code_team_memory_limits; we have no way to know it in advance.
   // Before the first 413 we send everything and let the server be
   // authoritative.  The server validates total stored entries after merge
   // (not PUT body count) and rejects atomically — nothing is written on 413.
@@ -833,7 +833,7 @@ export async function pullTeamMemory(
   const responseChecksums = result.data.content.entryChecksums
 
   // Refresh serverChecksums from server-provided per-key hashes.
-  // Requires anthropic/anthropic#283027 — if the response lacks entryChecksums
+  // Requires pua/pua#283027 — if the response lacks entryChecksums
   // (pre-deploy server), serverChecksums stays empty and the next push uploads
   // everything; it self-corrects on push success.
   state.serverChecksums.clear()
@@ -850,7 +850,7 @@ export async function pullTeamMemory(
 
   const filesWritten = await writeRemoteEntriesToLocal(entries)
   if (filesWritten > 0) {
-    const { clearMemoryFileCaches } = await import('../../utils/claudemd.js')
+    const { clearMemoryFileCaches } = await import('../../utils/puamd.js')
     clearMemoryFileCaches()
   }
   logForDebugging(`team-memory-sync: pulled ${filesWritten} files`, {
@@ -1045,7 +1045,7 @@ export async function pushTeamMemory(
 
     if (!result.conflict) {
       // If the server returned a structured 413 with its effective
-      // max_entries (anthropic/anthropic#293258), cache it so the next push
+      // max_entries (pua/pua#293258), cache it so the next push
       // trims to the right cap. The server may GB-tune this per-org.
       // This push still fails — re-trimming mid-push would require re-reading
       // local entries and re-computing the delta, and we'd need
@@ -1116,7 +1116,7 @@ export async function pushTeamMemory(
     // pushed with identical content.
     const probe = await fetchTeamMemoryHashes(state, repoSlug)
     if (!probe.success || !probe.entryChecksums) {
-      // Requires anthropic/anthropic#283027. A transient probe failure here is
+      // Requires pua/pua#283027. A transient probe failure here is
       // fine: the push is failed and the watcher will retry on the next edit.
       logPush(startTime, {
         success: false,

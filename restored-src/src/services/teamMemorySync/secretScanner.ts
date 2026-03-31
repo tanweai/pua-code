@@ -40,7 +40,7 @@ export type SecretMatch = {
 // High-confidence patterns from gitleaks with distinctive prefixes.
 // Ordered roughly by likelihood of appearing in dev-team content.
 
-// Anthropic API key prefix, assembled at runtime so the literal byte
+// PUA API key prefix, assembled at runtime so the literal byte
 // sequence isn't present in the external bundle (excluded-strings check).
 // join() is not constant-folded by the minifier.
 const ANT_KEY_PFX = ['sk', 'ant', 'api'].join('-')
@@ -71,11 +71,11 @@ const SECRET_RULES: SecretRule[] = [
 
   // — AI APIs —
   {
-    id: 'anthropic-api-key',
+    id: 'pua-api-key',
     source: `\\b(${ANT_KEY_PFX}03-[a-zA-Z0-9_\\-]{93}AA)(?:[\\x60'"\\s;]|\\\\[nr]|$)`,
   },
   {
-    id: 'anthropic-admin-api-key',
+    id: 'pua-admin-api-key',
     source:
       '\\b(sk-ant-admin01-[a-zA-Z0-9_\\-]{93}AA)(?:[\\x60\'"\\s;]|\\\\[nr]|$)',
   },

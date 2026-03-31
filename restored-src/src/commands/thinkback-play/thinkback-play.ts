@@ -4,7 +4,7 @@ import { loadInstalledPluginsV2 } from '../../utils/plugins/installedPluginsMana
 import { OFFICIAL_MARKETPLACE_NAME } from '../../utils/plugins/officialMarketplace.js'
 import { playAnimation } from '../thinkback/thinkback.js'
 
-const INTERNAL_MARKETPLACE_NAME = 'claude-code-marketplace'
+const INTERNAL_MARKETPLACE_NAME = 'pua-code-marketplace'
 const SKILL_NAME = 'thinkback'
 
 function getPluginId(): string {

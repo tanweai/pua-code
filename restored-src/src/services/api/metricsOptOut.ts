@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { hasProfileScope, isClaudeAISubscriber } from '../../utils/auth.js'
+import { hasProfileScope, isPUAAISubscriber } from '../../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
@@ -7,7 +7,7 @@ import { getAuthHeaders, withOAuth401Retry } from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
 import { memoizeWithTTLAsync } from '../../utils/memoize.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getPUACodeUserAgent } from '../../utils/userAgent.js'
 
 type MetricsEnabledResponse = {
   metrics_logging_enabled: boolean
@@ -23,7 +23,7 @@ const CACHE_TTL_MS = 60 * 60 * 1000
 
 // Disk TTL — org settings rarely change. When disk cache is fresher than this,
 // we skip the network entirely (no background refresh). This is what collapses
-// N `claude -p` invocations into ~1 API call/day.
+// N `pua -p` invocations into ~1 API call/day.
 const DISK_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 /**
@@ -38,11 +38,11 @@ async function _fetchMetricsEnabled(): Promise<MetricsEnabledResponse> {
 
   const headers = {
     'Content-Type': 'application/json',
-    'User-Agent': getClaudeCodeUserAgent(),
+    'User-Agent': getPUACodeUserAgent(),
     ...authResult.headers,
   }
 
-  const endpoint = `https://api.anthropic.com/api/claude_code/organizations/metrics_enabled`
+  const endpoint = `https://api.pua.com/api/pua_code/organizations/metrics_enabled`
   const response = await axios.get<MetricsEnabledResponse>(endpoint, {
     headers,
     timeout: 5000,
@@ -131,7 +131,7 @@ export async function checkMetricsEnabled(): Promise<MetricsStatus> {
   // This check runs before the disk read so we never persist auth-state-derived
   // answers — only real API responses go to disk. Otherwise a service-key
   // session would poison the cache for a later full-OAuth session.
-  if (isClaudeAISubscriber() && !hasProfileScope()) {
+  if (isPUAAISubscriber() && !hasProfileScope()) {
     return { enabled: false, hasError: false }
   }
 

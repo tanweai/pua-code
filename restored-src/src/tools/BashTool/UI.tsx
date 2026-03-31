@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
+import type { ToolResultBlockParam } from '@pua-ai/sdk/resources/index.mjs';
 import * as React from 'react';
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js';
 import { FallbackToolUseErrorMessage } from '../../components/FallbackToolUseErrorMessage.js';
@@ -69,7 +69,7 @@ export function BackgroundHint(t0) {
   useKeybinding("task:background", handleBackground, t3);
   const baseShortcut = useShortcutDisplay("task:background", "Task", "ctrl+b");
   const shortcut = env.terminal === "tmux" && baseShortcut === "ctrl+b" ? "ctrl+b ctrl+b (twice)" : baseShortcut;
-  if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_BACKGROUND_TASKS)) {
+  if (isEnvTruthy(process.env.PUA_CODE_DISABLE_BACKGROUND_TASKS)) {
     return null;
   }
   let t4;

@@ -1,6 +1,6 @@
 /**
  * Query profiling utility for measuring and reporting time spent in the query
- * pipeline from user input to first token arrival. Enable by setting CLAUDE_CODE_PROFILE_QUERY=1
+ * pipeline from user input to first token arrival. Enable by setting PUA_CODE_PROFILE_QUERY=1
  *
  * Uses Node.js built-in performance hooks API for standard timing measurement.
  * Tracks each query session with detailed checkpoints for identifying bottlenecks.
@@ -17,7 +17,7 @@
  * - query_api_streaming_start: Start of streaming API call
  * - query_tool_schema_build_start/end: Building tool schemas
  * - query_message_normalization_start/end: Normalizing messages
- * - query_client_creation_start/end: Creating Anthropic client
+ * - query_client_creation_start/end: Creating PUA client
  * - query_api_request_sent: HTTP request dispatched (before await, inside retry body)
  * - query_response_headers_received: .withResponse() resolved (headers arrived)
  * - query_first_chunk_received: First streaming chunk received (TTFT)
@@ -33,7 +33,7 @@ import { formatMs, formatTimelineLine, getPerformance } from './profilerBase.js'
 
 // Module-level state - initialized once when the module loads
 // eslint-disable-next-line custom-rules/no-process-env-top-level
-const ENABLED = isEnvTruthy(process.env.CLAUDE_CODE_PROFILE_QUERY)
+const ENABLED = isEnvTruthy(process.env.PUA_CODE_PROFILE_QUERY)
 
 // Track memory snapshots separately (perf_hooks doesn't track memory)
 const memorySnapshots = new Map<string, NodeJS.MemoryUsage>()
@@ -128,7 +128,7 @@ function getSlowWarning(deltaMs: number, name: string): string {
  */
 function getQueryProfileReport(): string {
   if (!ENABLED) {
-    return 'Query profiling not enabled (set CLAUDE_CODE_PROFILE_QUERY=1)'
+    return 'Query profiling not enabled (set PUA_CODE_PROFILE_QUERY=1)'
   }
 
   const perf = getPerformance()

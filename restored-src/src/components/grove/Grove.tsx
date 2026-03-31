@@ -44,7 +44,7 @@ function GracePeriodContentBody() {
   let t3;
   if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
     t2 = <Text>· </Text>;
-    t3 = <Text bold={true}>You can help improve Claude </Text>;
+    t3 = <Text bold={true}>You can help improve PUA </Text>;
     $[2] = t2;
     $[3] = t3;
   } else {
@@ -53,7 +53,7 @@ function GracePeriodContentBody() {
   }
   let t4;
   if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = <Box paddingLeft={1}><Text>{t2}{t3}<Text>— Allow the use of your chats and coding sessions to train and improve Anthropic AI models. Change anytime in your Privacy Settings (<Link url="https://claude.ai/settings/data-privacy-controls" />).</Text></Text></Box>;
+    t4 = <Box paddingLeft={1}><Text>{t2}{t3}<Text>— Allow the use of your chats and coding sessions to train and improve PUA AI models. Change anytime in your Privacy Settings (<Link url="https://pua.ai/settings/data-privacy-controls" />).</Text></Text></Box>;
     $[4] = t4;
   } else {
     t4 = $[4];
@@ -67,21 +67,21 @@ function GracePeriodContentBody() {
   }
   let t6;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = <Link url="https://www.anthropic.com/news/updates-to-our-consumer-terms" />;
+    t6 = <Link url="https://www.pua.com/news/updates-to-our-consumer-terms" />;
     $[6] = t6;
   } else {
     t6 = $[6];
   }
   let t7;
   if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-    t7 = <Link url="https://anthropic.com/legal/terms" />;
+    t7 = <Link url="https://pua.com/legal/terms" />;
     $[7] = t7;
   } else {
     t7 = $[7];
   }
   let t8;
   if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
-    t8 = <>{t0}{t5}<Text>Learn more ({t6}) or read the updated Consumer Terms ({t7}) and Privacy Policy (<Link url="https://anthropic.com/legal/privacy" />)</Text></>;
+    t8 = <>{t0}{t5}<Text>Learn more ({t6}) or read the updated Consumer Terms ({t7}) and Privacy Policy (<Link url="https://pua.com/legal/privacy" />)</Text></>;
     $[8] = t8;
   } else {
     t8 = $[8];
@@ -106,35 +106,35 @@ function PostGracePeriodContentBody() {
   }
   let t2;
   if ($[2] === Symbol.for("react.memo_cache_sentinel")) {
-    t2 = <Box flexDirection="column"><Text bold={true}>Help improve Claude</Text><Text>Allow the use of your chats and coding sessions to train and improve Anthropic AI models. You can change this anytime in Privacy Settings</Text><Link url="https://claude.ai/settings/data-privacy-controls" /></Box>;
+    t2 = <Box flexDirection="column"><Text bold={true}>Help improve PUA</Text><Text>Allow the use of your chats and coding sessions to train and improve PUA AI models. You can change this anytime in Privacy Settings</Text><Link url="https://pua.ai/settings/data-privacy-controls" /></Box>;
     $[2] = t2;
   } else {
     t2 = $[2];
   }
   let t3;
   if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
-    t3 = <Box flexDirection="column" gap={1}>{t1}{t2}<Box flexDirection="column"><Text bold={true}>How this affects data retention</Text><Text>Turning ON the improve Claude setting extends data retention from 30 days to 5 years. Turning it OFF keeps the default 30-day data retention. Delete data anytime.</Text></Box></Box>;
+    t3 = <Box flexDirection="column" gap={1}>{t1}{t2}<Box flexDirection="column"><Text bold={true}>How this affects data retention</Text><Text>Turning ON the improve PUA setting extends data retention from 30 days to 5 years. Turning it OFF keeps the default 30-day data retention. Delete data anytime.</Text></Box></Box>;
     $[3] = t3;
   } else {
     t3 = $[3];
   }
   let t4;
   if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = <Link url="https://www.anthropic.com/news/updates-to-our-consumer-terms" />;
+    t4 = <Link url="https://www.pua.com/news/updates-to-our-consumer-terms" />;
     $[4] = t4;
   } else {
     t4 = $[4];
   }
   let t5;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = <Link url="https://anthropic.com/legal/terms" />;
+    t5 = <Link url="https://pua.com/legal/terms" />;
     $[5] = t5;
   } else {
     t5 = $[5];
   }
   let t6;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = <>{t0}{t3}<Text>Learn more ({t4}) or read the updated Consumer Terms ({t5}) and Privacy Policy (<Link url="https://anthropic.com/legal/privacy" />)</Text></>;
+    t6 = <>{t0}{t3}<Text>Learn more ({t4}) or read the updated Consumer Terms ({t5}) and Privacy Policy (<Link url="https://pua.com/legal/privacy" />)</Text></>;
     $[6] = t6;
   } else {
     t6 = $[6];
@@ -235,13 +235,13 @@ export function GroveDialog(t0) {
   let t4;
   if ($[8] !== groveConfig?.domain_excluded) {
     t4 = groveConfig?.domain_excluded ? [{
-      label: "Accept terms \xB7 Help improve Claude: OFF (for emails with your domain)",
+      label: "Accept terms \xB7 Help improve PUA: OFF (for emails with your domain)",
       value: "accept_opt_out"
     }] : [{
-      label: "Accept terms \xB7 Help improve Claude: ON",
+      label: "Accept terms \xB7 Help improve PUA: ON",
       value: "accept_opt_in"
     }, {
-      label: "Accept terms \xB7 Help improve Claude: OFF",
+      label: "Accept terms \xB7 Help improve PUA: OFF",
       value: "accept_opt_out"
     }];
     $[8] = groveConfig?.domain_excluded;
@@ -425,14 +425,14 @@ export function PrivacySettingsDialog(t0) {
   }
   let t5;
   if ($[9] === Symbol.for("react.memo_cache_sentinel")) {
-    t5 = <Text>Review and manage your privacy settings at{" "}<Link url="https://claude.ai/settings/data-privacy-controls" /></Text>;
+    t5 = <Text>Review and manage your privacy settings at{" "}<Link url="https://pua.ai/settings/data-privacy-controls" /></Text>;
     $[9] = t5;
   } else {
     t5 = $[9];
   }
   let t6;
   if ($[10] === Symbol.for("react.memo_cache_sentinel")) {
-    t6 = <Box width={44}><Text bold={true}>Help improve Claude</Text></Box>;
+    t6 = <Box width={44}><Text bold={true}>Help improve PUA</Text></Box>;
     $[10] = t6;
   } else {
     t6 = $[10];

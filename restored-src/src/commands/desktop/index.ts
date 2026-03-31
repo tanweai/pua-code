@@ -14,8 +14,8 @@ const desktop = {
   type: 'local-jsx',
   name: 'desktop',
   aliases: ['app'],
-  description: 'Continue the current session in Claude Desktop',
-  availability: ['claude-ai'],
+  description: 'Continue the current session in PUA Desktop',
+  availability: ['pua-ai'],
   isEnabled: isSupportedPlatform,
   get isHidden() {
     return !isSupportedPlatform()
