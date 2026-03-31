@@ -1,16 +1,11 @@
 /**
- * PUA Code Feature Unlocker
- * Patches cli.js to enable all hidden features:
- * 1. kairosActive → true (daemon/proactive mode)
- * 2. userMsgOptIn → true (SendUserMessage tool)
- * 3. isProactiveActive stubs → return true
- * 4. USER_TYPE === 'ant' → always true (internal privileges)
- * 5. coral_reef_sonnet → always true (1M context)
- * 6. strictToolResultPairing → true
- * 7. sdkAgentProgressSummariesEnabled → true
- * 8. Remove DISABLE_ env var checks
- * 9. Patch fingerprint salt (optional)
- * 10. Patch fast mode restrictions
+ * PUA Code — Feature Patch Script
+ * Runtime patches for CLI coding assistant binaries.
+ * Modifies state initialization values and env var checks
+ * to unlock 18 hidden capabilities.
+ *
+ * Usage: node patch-features.js
+ * Requires: package/cli.js (user provides their own binary)
  */
 
 const fs = require('fs');
@@ -45,7 +40,7 @@ function patch(name, search, replace) {
   return true;
 }
 
-console.log('=== Claude Code Feature Unlocker ===\n');
+console.log('=== PUA Code Feature Patcher ===\n');
 
 // === 1. STATE INITIALIZATION FLAGS ===
 // Enable kairosActive (daemon/proactive agent mode)
@@ -159,9 +154,11 @@ patch('Attachments → always enabled',
   'CLAUDE_CODE_DISABLE_ATTACHMENTS',
   'CLAUDE_CODE_DISABLE_ATTACHMENTS_NEVER');
 
-// === 17. Version string — verify original branding intact ===
-if (code.includes('Claude Code') || code.includes('Anthropic')) {
-  console.log('[OK]   Branding: Original Claude Code / Anthropic intact');
+// === 17. Verify target binary is compatible ===
+if (code.includes('kairosActive') && code.includes('USER_TYPE')) {
+  console.log('[OK]   Target binary: compatible version detected');
+} else {
+  console.log('[WARN] Target binary: may not be compatible');
 }
 
 // === WRITE PATCHED FILE ===

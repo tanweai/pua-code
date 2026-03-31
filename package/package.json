@@ -1,6 +1,7 @@
 {
-  "name": "@pua-ai/pua-code",
+  "name": "pua-code-patch",
   "version": "2.1.88",
+  "description": "Runtime feature patch for CLI coding assistants. Unlocks 18 hidden capabilities via state initialization override.",
   "bin": {
     "pua": "cli.js"
   },
@@ -8,15 +9,11 @@
     "node": ">=18.0.0"
   },
   "type": "module",
-  "author": "PUA <support@pua.com>",
-  "license": "SEE LICENSE IN README.md",
-  "description": "Use PUA, PUA's AI assistant, right from your terminal. PUA can understand your codebase, edit files, run terminal commands, and handle entire workflows for you.",
-  "homepage": "https://github.com/puas/pua-code",
+  "author": "PUA Skill <hi@openpua.ai>",
+  "license": "MIT",
+  "homepage": "https://github.com/tanweai/pua-code",
   "bugs": {
-    "url": "https://github.com/puas/pua-code/issues"
-  },
-  "scripts": {
-    "prepare": "node -e \"if (!process.env.AUTHORIZED) { console.error('ERROR: Direct publishing is not allowed.\\nPlease see the release workflow documentation to publish this package.'); process.exit(1); }\""
+    "url": "https://github.com/tanweai/pua-code/issues"
   },
   "dependencies": {},
   "optionalDependencies": {

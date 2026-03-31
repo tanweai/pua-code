@@ -1,2 +1,10 @@
-dist/*.exe
-dist/pua-*
+dist/
+package/cli.js
+package/cli.js.map
+package/LICENSE.md
+package/README.md
+package/bun.lock
+restored-src/
+node_modules/
+*.tgz
+.DS_Store
