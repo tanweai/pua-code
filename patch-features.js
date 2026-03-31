@@ -45,7 +45,7 @@ function patch(name, search, replace) {
   return true;
 }
 
-console.log('=== PUA Code Feature Unlocker ===\n');
+console.log('=== Claude Code Feature Unlocker ===\n');
 
 // === 1. STATE INITIALIZATION FLAGS ===
 // Enable kairosActive (daemon/proactive agent mode)
@@ -98,71 +98,70 @@ patch('coral_reef_sonnet → always true',
   '.clientDataCache?.coral_reef_sonnet==="true"||!0');
 
 // === 5. FAST MODE — Remove disable check ===
-// Original: !i6(process.env.PUA_CODE_DISABLE_FAST_MODE)
+// Original: !i6(process.env.CLAUDE_CODE_DISABLE_FAST_MODE)
 // i6() returns true if var is NOT set (truthy check negated)
 // So !i6(DISABLE_FAST_MODE) means: return true if DISABLE_FAST_MODE is NOT set
 // We want fast mode always enabled regardless
 patch('Fast mode → always available',
-  'PUA_CODE_DISABLE_FAST_MODE',
-  'PUA_CODE_DISABLE_FAST_MODE_NEVER');
+  'CLAUDE_CODE_DISABLE_FAST_MODE',
+  'CLAUDE_CODE_DISABLE_FAST_MODE_NEVER');
 
 // === 6. DISABLE 1M CONTEXT — Remove disable check ===
 patch('1M context → always enabled',
-  'PUA_CODE_DISABLE_1M_CONTEXT',
-  'PUA_CODE_DISABLE_1M_CONTEXT_NEVER');
+  'CLAUDE_CODE_DISABLE_1M_CONTEXT',
+  'CLAUDE_CODE_DISABLE_1M_CONTEXT_NEVER');
 
 // === 7. DISABLE THINKING — Remove disable check ===
 patch('Thinking → always enabled',
-  'PUA_CODE_DISABLE_THINKING',
-  'PUA_CODE_DISABLE_THINKING_NEVER');
+  'CLAUDE_CODE_DISABLE_THINKING',
+  'CLAUDE_CODE_DISABLE_THINKING_NEVER');
 
 // === 8. DISABLE ADAPTIVE THINKING — Remove ===
 patch('Adaptive thinking → always enabled',
-  'PUA_CODE_DISABLE_ADAPTIVE_THINKING',
-  'PUA_CODE_DISABLE_ADAPTIVE_THINKING_NEVER');
+  'CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING',
+  'CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING_NEVER');
 
 // === 9. DISABLE BACKGROUND TASKS — Remove ===
 patch('Background tasks → always enabled',
-  'PUA_CODE_DISABLE_BACKGROUND_TASKS',
-  'PUA_CODE_DISABLE_BACKGROUND_TASKS_NEVER');
+  'CLAUDE_CODE_DISABLE_BACKGROUND_TASKS',
+  'CLAUDE_CODE_DISABLE_BACKGROUND_TASKS_NEVER');
 
 // === 10. DISABLE AUTO MEMORY — Remove ===
 patch('Auto memory → always enabled',
-  'PUA_CODE_DISABLE_AUTO_MEMORY',
-  'PUA_CODE_DISABLE_AUTO_MEMORY_NEVER');
+  'CLAUDE_CODE_DISABLE_AUTO_MEMORY',
+  'CLAUDE_CODE_DISABLE_AUTO_MEMORY_NEVER');
 
 // === 11. DISABLE CRON — Remove ===
 patch('Cron → always enabled',
-  'PUA_CODE_DISABLE_CRON',
-  'PUA_CODE_DISABLE_CRON_NEVER');
+  'CLAUDE_CODE_DISABLE_CRON',
+  'CLAUDE_CODE_DISABLE_CRON_NEVER');
 
 // === 12. DISABLE EXPERIMENTAL BETAS — Remove ===
 patch('Experimental betas → always enabled',
-  'PUA_CODE_DISABLE_EXPERIMENTAL_BETAS',
-  'PUA_CODE_DISABLE_EXPERIMENTAL_BETAS_NEVER');
+  'CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS',
+  'CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS_NEVER');
 
 // === 13. DISABLE COMMAND INJECTION CHECK — Keep enabled for safety ===
 // NOT patching this one - security feature should stay
 
 // === 14. DISABLE FILE CHECKPOINTING — Remove ===
 patch('File checkpointing → always enabled',
-  'PUA_CODE_DISABLE_FILE_CHECKPOINTING',
-  'PUA_CODE_DISABLE_FILE_CHECKPOINTING_NEVER');
+  'CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING',
+  'CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING_NEVER');
 
 // === 15. DISABLE ADVISOR TOOL — Remove ===
 patch('Advisor tool → always enabled',
-  'PUA_CODE_DISABLE_ADVISOR_TOOL',
-  'PUA_CODE_DISABLE_ADVISOR_TOOL_NEVER');
+  'CLAUDE_CODE_DISABLE_ADVISOR_TOOL',
+  'CLAUDE_CODE_DISABLE_ADVISOR_TOOL_NEVER');
 
 // === 16. DISABLE ATTACHMENTS — Remove ===
 patch('Attachments → always enabled',
-  'PUA_CODE_DISABLE_ATTACHMENTS',
-  'PUA_CODE_DISABLE_ATTACHMENTS_NEVER');
+  'CLAUDE_CODE_DISABLE_ATTACHMENTS',
+  'CLAUDE_CODE_DISABLE_ATTACHMENTS_NEVER');
 
-// === 17. Version string — rebrand ===
-// Already done in previous step, just verify
-if (code.includes('PUA Code')) {
-  console.log('[OK]   Branding: PUA Code confirmed');
+// === 17. Version string — verify original branding intact ===
+if (code.includes('Claude Code') || code.includes('Anthropic')) {
+  console.log('[OK]   Branding: Original Claude Code / Anthropic intact');
 }
 
 // === WRITE PATCHED FILE ===
@@ -179,4 +178,4 @@ console.log('userMsgOptIn:!0 present:', verify.includes('userMsgOptIn:!0'));
 console.log('USER_TYPE=ant injected:', verify.includes('process.env.USER_TYPE="ant"'));
 console.log('coral_reef always true:', verify.includes('coral_reef_sonnet==="true"||!0'));
 console.log('isProactiveActive??!0:', verify.includes('isProactiveActive()??!0'));
-console.log('Fast mode disable neutered:', !verify.includes('PUA_CODE_DISABLE_FAST_MODE"') || verify.includes('PUA_CODE_DISABLE_FAST_MODE_NEVER'));
+console.log('Fast mode disable neutered:', !verify.includes('CLAUDE_CODE_DISABLE_FAST_MODE"') || verify.includes('CLAUDE_CODE_DISABLE_FAST_MODE_NEVER'));

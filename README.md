@@ -136,7 +136,7 @@ pua "帮我把这个项目的测试覆盖率从 60% 提到 90%"
 **环境变量微调：**
 
 ```bash
-export PUA_CODE_PROACTIVE=1          # 强制自主模式
+export CLAUDE_CODE_PROACTIVE=1          # 强制自主模式
 export CLAUDE_CODE_JSONL_TRANSCRIPT=1 # 启用 JSONL 转录日志
 ```
 
@@ -224,24 +224,24 @@ node package/cli.js      # 运行补丁版本
 | `FORCE_VCR` | VCR 录制回放 | `1` |
 | `VCR_RECORD` | VCR 录制模式 | `1` |
 | `USE_STAGING_OAUTH` | Staging OAuth | `1` |
-| `PUA_CODE_PROACTIVE` | 强制自主模式 | `1` |
+| `CLAUDE_CODE_PROACTIVE` | 强制自主模式 | `1` |
 
 ### 已移除的限制开关
 
 以下 DISABLE 检查已被移除，对应功能永远开启：
 
 ```
-PUA_CODE_DISABLE_FAST_MODE          → 永远不会被禁用
-PUA_CODE_DISABLE_1M_CONTEXT         → 永远不会被禁用
-PUA_CODE_DISABLE_THINKING           → 永远不会被禁用
-PUA_CODE_DISABLE_ADAPTIVE_THINKING  → 永远不会被禁用
-PUA_CODE_DISABLE_BACKGROUND_TASKS   → 永远不会被禁用
-PUA_CODE_DISABLE_AUTO_MEMORY        → 永远不会被禁用
-PUA_CODE_DISABLE_CRON               → 永远不会被禁用
-PUA_CODE_DISABLE_EXPERIMENTAL_BETAS → 永远不会被禁用
-PUA_CODE_DISABLE_FILE_CHECKPOINTING → 永远不会被禁用
-PUA_CODE_DISABLE_ADVISOR_TOOL       → 永远不会被禁用
-PUA_CODE_DISABLE_ATTACHMENTS        → 永远不会被禁用
+CLAUDE_CODE_DISABLE_FAST_MODE          → 永远不会被禁用
+CLAUDE_CODE_DISABLE_1M_CONTEXT         → 永远不会被禁用
+CLAUDE_CODE_DISABLE_THINKING           → 永远不会被禁用
+CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING  → 永远不会被禁用
+CLAUDE_CODE_DISABLE_BACKGROUND_TASKS   → 永远不会被禁用
+CLAUDE_CODE_DISABLE_AUTO_MEMORY        → 永远不会被禁用
+CLAUDE_CODE_DISABLE_CRON               → 永远不会被禁用
+CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS → 永远不会被禁用
+CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING → 永远不会被禁用
+CLAUDE_CODE_DISABLE_ADVISOR_TOOL       → 永远不会被禁用
+CLAUDE_CODE_DISABLE_ATTACHMENTS        → 永远不会被禁用
 ```
 
 ---
