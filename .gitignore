@@ -1,0 +1,4 @@
+node_modules/
+# Keep tgz - it's the npm package artifact
+.DS_Store
+*.log
